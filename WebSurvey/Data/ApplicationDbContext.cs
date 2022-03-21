@@ -1,6 +1,16 @@
-﻿namespace WebSurvey.Data
+﻿using Microsoft.EntityFrameworkCore;
+using WebSurvey.Models;
+
+namespace WebSurvey.Data
 {
-    public class ApplicationDbContext
+    public class ApplicationDbContext : DbContext
     {
+        public ApplicationDbContext(DbContextOptions options) : base(options)
+        { }
+
+        DbSet<Survey> Surveys { get; set; }
+        DbSet<SurveyQuestion> Questions { get; set; }
+        DbSet<SurveyQuestionOption> Options { get; set; }
+        DbSet<SurveyResult> Results { get; set; }
     }
 }
