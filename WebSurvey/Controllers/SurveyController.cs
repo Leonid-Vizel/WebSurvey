@@ -4,7 +4,6 @@ namespace WebSurvey.Controllers
 {
     public class SurveyController : Controller
     {
-
         public IActionResult Create()
         {
             //Только авторизованный
@@ -19,7 +18,11 @@ namespace WebSurvey.Controllers
 
         public IActionResult Status(int Id)
         {
+            return View();
+        }
 
+        public IActionResult Select()
+        {
             return View();
         }
 

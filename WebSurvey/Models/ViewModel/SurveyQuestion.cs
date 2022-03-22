@@ -2,7 +2,7 @@
 {
     public class SurveyQuestion : Database.SurveyQuestion
     {
-        public SurveyQuestion(Database.SurveyQuestion input, Database.SurveyQuestionOption[] options)
+        public SurveyQuestion(Database.SurveyQuestion input, SurveyQuestionOption[] options)
         {
             Id = input.Id;
             SurveyId = input.SurveyId;
@@ -11,6 +11,6 @@
             this.options = options;
         }
 
-        Database.SurveyQuestionOption[] options { get; set; }
+        SurveyQuestionOption[] options { get; set; }
     }
 }

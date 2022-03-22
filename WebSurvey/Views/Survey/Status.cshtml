@@ -1,0 +1,14 @@
+﻿@using WebSurvey.Models.ViewModel
+@model SurveyStatistics
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class = "text-center">
+    <h1>Пройти опрос</h1>
+</div>
+<p>Название: @Model.Name</p>
+<p>Описание: @Model.Description</p>
+<p>Пройден @Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</p>
+<hr/>
+<a asp-controller = "Survey" asp-action = "Take" asp-route-id = "@Model.Id">Пройти</a>
