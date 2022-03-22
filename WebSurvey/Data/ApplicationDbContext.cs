@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WebSurvey.Models;
+using WebSurvey.Models.Database;
 
 namespace WebSurvey.Data
 {

@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSurvey.Models
+namespace WebSurvey.Models.Database
 {
     public class SurveyResult
     {
         [Key]
         public int Id { get; set; }
         public int SurveyId { get; set; }
-        public Byte[] Data { get; set; }
+        public byte[] Data { get; set; }
     }
 }

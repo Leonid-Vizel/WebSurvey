@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSurvey.Models
+namespace WebSurvey.Models.Database
 {
     public class SurveyQuestion
     {
@@ -8,7 +8,7 @@ namespace WebSurvey.Models
         public int Id { get; set; }
         public int SurveyId { get; set; }
         public string Name { get; set; }
-        public QuestionType type { get; set; }
+        public QuestionType Type { get; set; }
     }
 
     public enum QuestionType

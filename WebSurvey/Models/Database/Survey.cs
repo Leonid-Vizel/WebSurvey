@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSurvey.Models
+namespace WebSurvey.Models.Database
 {
     public class Survey
     {
