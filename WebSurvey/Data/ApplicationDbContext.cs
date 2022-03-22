@@ -9,9 +9,9 @@ namespace WebSurvey.Data
         public ApplicationDbContext(DbContextOptions options) : base(options)
         { }
 
-        DbSet<Survey> Surveys { get; set; }
-        DbSet<SurveyQuestion> Questions { get; set; }
-        DbSet<SurveyQuestionOption> Options { get; set; }
-        DbSet<SurveyResult> Results { get; set; }
+        public DbSet<Survey> Surveys { get; set; }
+        public DbSet<SurveyQuestion> Questions { get; set; }
+        public DbSet<SurveyQuestionOption> Options { get; set; }
+        public DbSet<SurveyResult> Results { get; set; }
     }
 }

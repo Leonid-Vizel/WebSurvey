@@ -1,4 +1,5 @@
-﻿@{
+﻿@model IndexSearchModel
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -12,7 +13,7 @@
         <img class="card-img-top" src="/img/PlusImage.png" alt="Card image cap">
         <div class="card-body">
             <h5 class="card-title">Создать опрос</h5>
-            <p class="card-text">...</p>
+            <p class="card-text">Создавайте свои собственные опросы с мопощью генератора опросов. Для использования зарегистрируйтсь.</p>
             <a asp-controller="Survey" asp-action="Create" class="btn btn-outline-primary" style="width: 100%">Создать</a>
         </div>
     </div>
@@ -20,8 +21,13 @@
         <img class="card-img-top" src="/img/VoteImage.png" alt="Card image cap">
         <div class="card-body">
             <h5 class="card-title">Пройти опрос</h5>
-            <p class="card-text">...</p>
-            <a asp-controller="Survey" asp-action="Select" class="btn btn-outline-primary" style="width: 100%">Пройти</a>
+            <form method="post">
+                <label class = "card-text">Введите номер опроса:</label>
+                <input asp-for="Search" class="form-control mb-1" placeholder = "0" aria-required = "true">
+                <span asp-validation-for="Search" class="text-danger"></span>
+                <button type = "submit" class = "btn btn-outline-primary" style="width: 100%">Пройти</button>
+            </form>
         </div>
     </div>
 </div>
+

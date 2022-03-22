@@ -1,21 +1,43 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using WebSurvey.Data;
 using WebSurvey.Models;
 
 namespace WebSurvey.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ApplicationDbContext db;
+        public HomeController(ApplicationDbContext db)
         {
-            _logger = logger;
+            this.db = db;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Index(IndexSearchModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                if (db.Surveys.Any(x=>x.Id == model.Search))
+                {
+                    return RedirectToAction(controllerName: "Survey", actionName: "Status", routeValues: new { Id = model.Search } );
+                }
+                else
+                {
+                    ModelState.AddModelError("Search","Опрос не найден");
+                    return View(model);
+                }
+            }
+            else
+            {
+                return View();
+            }
         }
 
         public IActionResult Privacy()

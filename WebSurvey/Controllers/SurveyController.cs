@@ -1,9 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebSurvey.Data;
+using WebSurvey.Models.Database;
+using WebSurvey.Models.ViewModel;
 
 namespace WebSurvey.Controllers
 {
     public class SurveyController : Controller
     {
+        private ApplicationDbContext db;
+        public SurveyController(ApplicationDbContext db)
+        {
+            this.db = db;
+        }
+
         public IActionResult Create()
         {
             //Только авторизованный
@@ -18,7 +27,15 @@ namespace WebSurvey.Controllers
 
         public IActionResult Status(int Id)
         {
-            return View();
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
+            if (foundSurvey != null)
+            {
+                return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.Id == Id)));
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         public IActionResult Select()
@@ -28,7 +45,6 @@ namespace WebSurvey.Controllers
 
         public IActionResult Take(int Id)
         {
-            //Любой
             return View();
         }
 
