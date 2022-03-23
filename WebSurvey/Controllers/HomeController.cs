@@ -20,7 +20,7 @@ namespace WebSurvey.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Index(IndexSearchModel model)
+        public IActionResult Index(SurveySearchModel model)
         {
             if (ModelState.IsValid)
             {
