@@ -8,9 +8,9 @@
             SurveyId = input.SurveyId;
             Name = input.Name;
             Type = input.Type;
-            this.options = options;
+            Options = options;
         }
 
-        SurveyQuestionOption[] options { get; set; }
+        public SurveyQuestionOption[] Options { get; set; }
     }
 }

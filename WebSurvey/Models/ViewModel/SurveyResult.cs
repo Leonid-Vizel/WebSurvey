@@ -14,13 +14,24 @@ namespace WebSurvey.Models.ViewModel
                 stream.Write(Data, 0, Data.Length);
                 stream.Position = 0;
 
-                results = formatter.Deserialize(stream) as Dictionary<SurveyQuestion, object>;
+                Results = formatter.Deserialize(stream) as Dictionary<SurveyQuestion, object>;
             }
-            if (results == null)
+            if (Results == null)
             {
-                results = new Dictionary<SurveyQuestion, object>();
+                Results = new Dictionary<SurveyQuestion, object>();
             }
         }
-        Dictionary<SurveyQuestion, object> results { get; set; }
+
+        public SurveyResult(int surveyId, SurveyQuestion[] questions)
+        {
+            SurveyId = surveyId;
+            Results = new Dictionary<SurveyQuestion, object?>();
+            foreach (SurveyQuestion question in questions)
+            {
+                Results.Add(question, null);
+            }
+        }
+
+        public Dictionary<SurveyQuestion, object?> Results { get; set; }
     }
 }

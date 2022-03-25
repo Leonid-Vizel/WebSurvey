@@ -7,9 +7,13 @@
             Id = input.Id;
             Name = input.Name;
             Description = input.Description;
-            this.questions = questions;
+            IsAnonimous = input.IsAnonimous;
+            IsOneOff = input.IsOneOff;
+            IsPassworded = input.IsPassworded;
+            Password = input.Password;
+            Questions = questions;
         }
 
-        Database.SurveyQuestion[] questions { get; set; }
+        public Database.SurveyQuestion[] Questions { get; set; }
     }
 }

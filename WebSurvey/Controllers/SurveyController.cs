@@ -79,13 +79,44 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return View();
+                return View(model);
             }
         }
 
         public IActionResult Take(int Id)
         {
-            return View();
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x=>x.Id == Id);
+            if (foundSurvey != null)
+            {
+                List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == Id).ToList();
+                if (foundQuestions.Count() > 0)
+                {
+                    Models.ViewModel.SurveyQuestion[] questionArray = new Models.ViewModel.SurveyQuestion[foundQuestions.Count()];
+                    int counter = 0;
+                    foreach (Models.Database.SurveyQuestion question in foundQuestions)
+                    {
+                        IEnumerable<SurveyQuestionOption> options = db.Options.Where(x => x.QuestionId == question.Id);
+                        if (question.Type == QuestionType.Text || options.Count() > 0)
+                        {
+                            questionArray[counter++] = new Models.ViewModel.SurveyQuestion(question, options.ToArray());
+                        }
+                        else
+                        {
+                            return NotFound();
+                        }
+                    }
+                    Models.ViewModel.SurveyResult emptyResults = new Models.ViewModel.SurveyResult(Id, questionArray);
+                    return View((emptyResults, foundSurvey.Name));
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         public IActionResult Close(int Id)
