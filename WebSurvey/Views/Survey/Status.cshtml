@@ -9,4 +9,4 @@
 <p>Описание: <b>@Model.Description</b></p>
 <p>Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b></p>
 <hr />
-<a asp-controller="Survey" asp-action="Take" asp-route-id="@Model.Id" class="btn btn-outline-primary">Пройти</a>
+<a asp-controller="Survey" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Пройти</a>

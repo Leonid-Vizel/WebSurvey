@@ -83,30 +83,29 @@ namespace WebSurvey.Controllers
             }
         }
 
-        public IActionResult Take(int Id)
+        public IActionResult Take(int SurveyId)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x=>x.Id == Id);
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x=>x.Id == SurveyId);
             if (foundSurvey != null)
             {
-                List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == Id).ToList();
+                List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == SurveyId).ToList();
                 if (foundQuestions.Count() > 0)
                 {
-                    Models.ViewModel.SurveyQuestion[] questionArray = new Models.ViewModel.SurveyQuestion[foundQuestions.Count()];
-                    int counter = 0;
+                    List<Models.ViewModel.SurveyQuestion> questionList = new List<Models.ViewModel.SurveyQuestion>(foundQuestions.Count());
                     foreach (Models.Database.SurveyQuestion question in foundQuestions)
                     {
                         IEnumerable<SurveyQuestionOption> options = db.Options.Where(x => x.QuestionId == question.Id);
                         if (question.Type == QuestionType.Text || options.Count() > 0)
                         {
-                            questionArray[counter++] = new Models.ViewModel.SurveyQuestion(question, options.ToArray());
+                            questionList.Add(new Models.ViewModel.SurveyQuestion(question, options.ToArray()));
                         }
                         else
                         {
                             return NotFound();
                         }
                     }
-                    Models.ViewModel.SurveyResult emptyResults = new Models.ViewModel.SurveyResult(Id, questionArray);
-                    return View((emptyResults, foundSurvey.Name));
+                    Models.ViewModel.SurveyResult emptyResults = new Models.ViewModel.SurveyResult(foundSurvey, questionList);
+                    return View(emptyResults);
                 }
                 else
                 {
@@ -117,6 +116,14 @@ namespace WebSurvey.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Take")]
+        public IActionResult TakePOST(Models.ViewModel.SurveyResult res)
+        {
+            return NotFound();
         }
 
         public IActionResult Close(int Id)
