@@ -10,6 +10,7 @@
             IsAnonimous = input.IsAnonimous;
             IsOneOff = input.IsOneOff;
             IsPassworded = input.IsPassworded;
+            IsClosed = input.IsClosed;
             Password = input.Password;
             Questions = questions;
         }

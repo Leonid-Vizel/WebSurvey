@@ -11,6 +11,8 @@ namespace WebSurvey.Models.Database
         [Required]
         public string Description { get; set; }
         [Required]
+        public bool IsClosed { get; set; }
+        [Required]
         public bool IsPassworded { get; set; } //Закрытый/Публичный
         public string? Password { get; set; }
         [Required]
