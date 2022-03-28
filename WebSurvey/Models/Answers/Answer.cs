@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace WebSurvey.Models.Answers
+﻿namespace WebSurvey.Models.Answers
 {
     public class Answer
     {
