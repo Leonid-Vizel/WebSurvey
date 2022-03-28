@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization.Formatters.Binary;
+﻿using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
 using WebSurvey.Models.Answers;
 
 namespace WebSurvey.Models.ViewModel
@@ -11,13 +13,11 @@ namespace WebSurvey.Models.ViewModel
             Id = input.Id;
             SurveyId = input.SurveyId;
             Name = name;
-            BinaryFormatter formatter = new BinaryFormatter();
             using (MemoryStream stream = new MemoryStream())
             {
                 stream.Write(Data, 0, Data.Length);
                 stream.Position = 0;
-
-                Results = formatter.Deserialize(stream) as List<Answer>;
+                Results = JsonSerializer.Deserialize(stream, typeof(List<Answer>)) as List<Answer>;
             }
             if (Results == null)
             {
@@ -25,10 +25,7 @@ namespace WebSurvey.Models.ViewModel
             }
         }
 
-        public SurveyResult()
-        {
-
-        }
+        public SurveyResult() { }
 
         public SurveyResult(Database.Survey survey, List<SurveyQuestion> questions)
         {
@@ -52,6 +49,18 @@ namespace WebSurvey.Models.ViewModel
             {
                 Results.Add(new Answer());
             }
+        }
+
+        public Database.SurveyResult ToDbClass()
+        {
+            Database.SurveyResult dbResult = new Database.SurveyResult();
+            dbResult.SurveyId = SurveyId;
+            using (MemoryStream memStream = new MemoryStream())
+            {
+                JsonSerializer.Serialize(memStream, Results);
+                dbResult.Data = memStream.ToArray();
+            }
+            return dbResult;
         }
 
         public string Name { get; set; }

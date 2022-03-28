@@ -123,6 +123,8 @@ namespace WebSurvey.Controllers
         [ActionName("Take")]
         public IActionResult TakePOST(Models.ViewModel.SurveyResult res)
         {
+            db.Results.Add(res.ToDbClass());
+            db.SaveChanges();
             return NotFound();
         }
 
