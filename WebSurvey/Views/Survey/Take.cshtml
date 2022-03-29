@@ -16,11 +16,11 @@
                 case WebSurvey.Models.Database.QuestionType.Text:
                     if (Model.Results[i] != null)
                     {
-                        @Html.TextBoxFor(m => m.Results[i].TextAnswer);
+                        @Html.TextAreaFor(m => m.Results[i].TextAnswer);
                     }
                     else
                     {
-                        @Html.TextBoxFor(m => m.Results[i].TextAnswer);
+                        @Html.TextAreaFor(m => m.Results[i].TextAnswer);
                     }
                     break;
                 case WebSurvey.Models.Database.QuestionType.Radio:

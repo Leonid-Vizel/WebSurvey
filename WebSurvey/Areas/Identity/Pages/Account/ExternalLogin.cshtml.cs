@@ -2,21 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
 
 namespace WebSurvey.Areas.Identity.Pages.Account
 {
@@ -81,8 +76,9 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "")]
+            [EmailAddress(ErrorMessage = "")]
+            [Display(Name = "Почта")]
             public string Email { get; set; }
         }
         
@@ -101,13 +97,13 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             if (remoteError != null)
             {
-                ErrorMessage = $"Error from external provider: {remoteError}";
+                ErrorMessage = $"Ошибка внешнего способа авторизации: {remoteError}";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information.";
+                ErrorMessage = "Ошибка загрузки информации и внешнем способе авторизации.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
@@ -115,7 +111,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (result.Succeeded)
             {
-                _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                _logger.LogInformation("{Name} вошёл с помощью внешнего сервиса авторизации '{LoginProvider}'.", info.Principal.Identity.Name, info.LoginProvider);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -145,7 +141,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null)
             {
-                ErrorMessage = "Error loading external login information during confirmation.";
+                ErrorMessage = "Ошибка загрузки информации о внешнем способе входа.";
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
             }
 
@@ -162,7 +158,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
+                        _logger.LogInformation("Пользователь создал аккаунт с помощью внешнего способа авторизации.", info.LoginProvider);
 
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -173,8 +169,8 @@ namespace WebSurvey.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        await _emailSender.SendEmailAsync(Input.Email, "Подтверждение почты",
+                            $"Пожалуйста поджтвердите ваш аккаунт нажав <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>сюда</a>.");
 
                         // If account confirmation is required, we need to show the link if we don't have a real email sender
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
@@ -205,7 +201,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
+                throw new InvalidOperationException($"Невозможно создать объект '{nameof(IdentityUser)}'. " +
                     $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                     $"override the external login page in /Areas/Identity/Pages/Account/ExternalLogin.cshtml");
             }
