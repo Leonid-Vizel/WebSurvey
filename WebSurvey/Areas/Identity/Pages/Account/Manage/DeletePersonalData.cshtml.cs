@@ -62,7 +62,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Невозможно зпгрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Невозможно загрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
             }
 
             RequirePassword = await _userManager.HasPasswordAsync(user);
@@ -74,7 +74,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Невозможно зпгрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Невозможно загрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
             }
 
             RequirePassword = await _userManager.HasPasswordAsync(user);

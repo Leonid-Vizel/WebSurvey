@@ -27,7 +27,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Невозможно загрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
             }
 
             return Page();

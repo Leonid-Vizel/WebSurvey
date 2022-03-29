@@ -8,11 +8,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
 
 namespace WebSurvey.Areas.Identity.Pages.Account.Manage
 {
@@ -77,10 +75,10 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Код верификации должен быть обязательно указан")]
+            [StringLength(7, ErrorMessage = "Длина кода - от 6 до 7 символов", MinimumLength = 6)]
             [DataType(DataType.Text)]
-            [Display(Name = "Verification Code")]
+            [Display(Name = "Код Верификации")]
             public string Code { get; set; }
         }
 
@@ -89,7 +87,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                NotFound($"Невозможно загрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
             }
 
             await LoadSharedKeyAndQrCodeUriAsync(user);
@@ -102,7 +100,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                return NotFound($"Невозможно загрузить пользователя с ID: '{_userManager.GetUserId(User)}'.");
             }
 
             if (!ModelState.IsValid)
@@ -119,16 +117,16 @@ namespace WebSurvey.Areas.Identity.Pages.Account.Manage
 
             if (!is2faTokenValid)
             {
-                ModelState.AddModelError("Input.Code", "Verification code is invalid.");
+                ModelState.AddModelError("Input.Code", "Неверный код верификации.");
                 await LoadSharedKeyAndQrCodeUriAsync(user);
                 return Page();
             }
 
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             var userId = await _userManager.GetUserIdAsync(user);
-            _logger.LogInformation("User with ID '{UserId}' has enabled 2FA with an authenticator app.", userId);
+            _logger.LogInformation("Пользователь с ID '{UserId}' подключил 2FA с помощью Приложения-Аутентификатора.", userId);
 
-            StatusMessage = "Your authenticator app has been verified.";
+            StatusMessage = "Приложение-Аутентификатор подтверждено!";
 
             if (await _userManager.CountRecoveryCodesAsync(user) == 0)
             {
