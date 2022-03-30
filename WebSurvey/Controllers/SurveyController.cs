@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using WebSurvey.Data;
 using WebSurvey.Models;
 using WebSurvey.Models.Database;
@@ -8,10 +9,12 @@ namespace WebSurvey.Controllers
 {
     public class SurveyController : Controller
     {
+        private SignInManager<IdentityUser> signInManager;
         private ApplicationDbContext db;
-        public SurveyController(ApplicationDbContext db)
+        public SurveyController(ApplicationDbContext db, SignInManager<IdentityUser> signInManager)
         {
             this.db = db;
+            this.signInManager = signInManager;
         }
 
         public IActionResult Create()
@@ -48,7 +51,7 @@ namespace WebSurvey.Controllers
                 //        //check if 
                 //    }
                 //}
-                return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.Id == Id)));
+                return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == Id)));
             }
             else
             {

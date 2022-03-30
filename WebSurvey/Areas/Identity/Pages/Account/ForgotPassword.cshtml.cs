@@ -44,8 +44,9 @@ namespace WebSurvey.Areas.Identity.Pages.Account
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Почта должна быть обязательно указана")]
+            [EmailAddress(ErrorMessage = "Строка не соответсвует формату почты")]
+            [Display(Name = "Почта")]
             public string Email { get; set; }
         }
 
@@ -72,8 +73,8 @@ namespace WebSurvey.Areas.Identity.Pages.Account
 
                 await _emailSender.SendEmailAsync(
                     Input.Email,
-                    "Reset Password",
-                    $"Please reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    "Восстановление пароля",
+                    $"Пожалуйста, пройдите по <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>этой</a> сслыке для восстановления вашего пароля.");
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

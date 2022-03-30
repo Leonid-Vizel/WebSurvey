@@ -20,10 +20,28 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Главная</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Опросы</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" asp-controller="Survey" asp-action="Create">Создать</a>
+                                <a class="dropdown-item" asp-controller="Survey" asp-action="Edit">Редактировать</a>
+                                <a class="dropdown-item" asp-controller="Survey" asp-action="Select">Пройти</a>
+                                <a class="dropdown-item" asp-controller="Survey" asp-action="Results">Получить результаты</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Тесты</a>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" asp-controller="Test" asp-action="Create">Создать</a>
+                                <a class="dropdown-item" asp-controller="Test" asp-action="Edit">Редактировать</a>
+                                <a class="dropdown-item" asp-controller="Test" asp-action="Select">Пройти</a>
+                                <a class="dropdown-item" asp-controller="Test" asp-action="Results">Получить результаты</a>
+                            </div>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Инфо</a>
                         </li>
                     </ul>
                     <partial name = "_LoginPartial"></partial>

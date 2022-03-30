@@ -16,3 +16,13 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.p-no-space {
+    margin-bottom: 0;
+}
+
+.ul-no-space {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 1em;
+}

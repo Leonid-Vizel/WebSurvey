@@ -7,6 +7,36 @@
 <h1 class="text-center">Информация об опросе</h1>
 <p>Название: <b>@Model.Name</b></p>
 <p>Описание: <b>@Model.Description</b></p>
+<p class = "p-no-space">Тип опроса:
+    <ul class = "ul-no-space">
+        @if (Model.IsPassworded)
+        {
+            <li>Запароленный</li>
+        }
+        else
+        {
+            <li>Публичный</li>
+        }
+
+        @if (Model.IsAnonimous)
+        {
+            <li>Анонимный</li>
+        }
+        else
+        {
+            <li>Стандартный</li>
+        }
+
+        @if (Model.IsOneOff)
+        {
+            <li>Одноразовый</li>
+        }
+        else
+        {
+            <li>Многоразовый</li>
+        }
+    </ul>
+</p>
 <p>Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b></p>
 <hr />
 <a asp-controller="Survey" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Пройти</a>
