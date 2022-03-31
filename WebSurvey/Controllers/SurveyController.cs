@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ClosedXML.Excel;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using WebSurvey.Data;
 using WebSurvey.Models;
+using WebSurvey.Models.Answers;
 using WebSurvey.Models.Database;
 using WebSurvey.Models.ViewModel;
 
@@ -21,11 +23,6 @@ namespace WebSurvey.Controllers
         }
 
         public IActionResult Create()
-        {
-            return View();
-        }
-
-        public IActionResult Edit(int Id)
         {
             return View();
         }
@@ -50,7 +47,7 @@ namespace WebSurvey.Controllers
             Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == passwordInfo.Id);
             if (foundSurvey != null)
             {
-                return RedirectToAction("Take", new { SurveyId = passwordInfo.Id, password = passwordInfo.Password});
+                return RedirectToAction("Take", new { SurveyId = passwordInfo.Id, password = passwordInfo.Password });
             }
             else
             {
@@ -87,7 +84,7 @@ namespace WebSurvey.Controllers
 
         public IActionResult Take(int SurveyId, string password)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x=>x.Id == SurveyId);
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == SurveyId);
             if (foundSurvey != null)
             {
                 if (foundSurvey.IsClosed)
@@ -158,16 +155,132 @@ namespace WebSurvey.Controllers
             return View();
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Close")]
+        public async Task<IActionResult> ClosePOST(int Id)
+        {
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            if (foundSurvey != null)
+            {
+                foundSurvey.IsClosed = true;
+                await db.Surveys.AddAsync(foundSurvey);
+                await db.SaveChangesAsync();
+                return RedirectToAction(controllerName: "Home", actionName: "Index");
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         public IActionResult Delete(int Id)
         {
-            //Только авторизованный и автор
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeletePOST(int Id)
+        {
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            if (foundSurvey != null)
+            {
+                db.Surveys.Remove(foundSurvey);
+                Models.Database.SurveyQuestion[] arrayToDelete = db.Questions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
+                foreach (Models.Database.SurveyQuestion question in arrayToDelete)
+                {
+                    db.RemoveRange(db.Options.Where(x => x.QuestionId == question.Id));
+                }
+                db.RemoveRange(arrayToDelete);
+                db.RemoveRange(db.Results.Where(x => x.SurveyId == foundSurvey.Id));
+                await db.SaveChangesAsync();
+                return RedirectToAction(controllerName: "Home", actionName: "Index");
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         public IActionResult Results(int Id)
         {
             //Только авторизованный и автор
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Results")]
+        public IActionResult ResultsPOST(int Id)
+        {
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            if (foundSurvey != null)
+            {
+                List<Models.ViewModel.SurveyResult> clearResults = new List<Models.ViewModel.SurveyResult>();
+                List<Models.ViewModel.SurveyQuestion> clearSurveyQuestions = new List<Models.ViewModel.SurveyQuestion>();
+                foreach (Models.Database.SurveyQuestion question in db.Questions.Where(x => x.SurveyId == foundSurvey.Id))
+                {
+                    clearSurveyQuestions.Add(new Models.ViewModel.SurveyQuestion(question, null));
+                }
+                foreach (Models.Database.SurveyResult result in db.Results.Where(x => x.SurveyId == foundSurvey.Id))
+                {
+                    clearResults.Add(new Models.ViewModel.SurveyResult(result, foundSurvey.Name, clearSurveyQuestions));
+                }
+
+                using (XLWorkbook workbook = new XLWorkbook())
+                {
+                    IXLWorksheet worksheet = workbook.Worksheets.Add("Results");
+                    int currentRow = 1;
+                    int currentCol = 1;
+                    worksheet.Cell(currentRow, currentCol++).Value = "Id";
+                    if (!foundSurvey.IsAnonimous)
+                    {
+                        worksheet.Cell(currentRow, currentCol++).Value = "Никнейм";
+                    }
+
+                    foreach (Models.ViewModel.SurveyQuestion questionHeader in clearSurveyQuestions)
+                    {
+                        worksheet.Cell(currentRow, currentCol++).Value = questionHeader.Name;
+                    }
+                    foreach (Models.ViewModel.SurveyResult result in clearResults)
+                    {
+                        currentCol = 1;
+                        worksheet.Cell(++currentRow, currentCol++).Value = result.Id;
+                        if (!foundSurvey.IsAnonimous)
+                        {
+                            worksheet.Cell(currentRow, currentCol++).Value = result.UserId;
+                        }
+                        for (int i = 0; i < result.Results.Count; i++)
+                        {
+                            if (result.Questions[i].Type == QuestionType.Check)
+                            {
+                                worksheet.Cell(currentRow, currentCol++).Value = string.Join("; ", result.Results[i].CheckAnswers);
+                            }
+                            else
+                            {
+                                worksheet.Cell(currentRow, currentCol++).Value = result.Results[i].TextAnswer;
+                            }
+                        }
+                    }
+
+                    using (MemoryStream memStream = new MemoryStream())
+                    {
+                        workbook.SaveAs(memStream);
+                        byte[] content = memStream.ToArray();
+
+                        return File(
+                            content,
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            "users.xlsx");
+                    }
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }

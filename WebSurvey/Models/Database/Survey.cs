@@ -11,6 +11,10 @@ namespace WebSurvey.Models.Database
         [Required]
         public string Description { get; set; }
         [Required]
+        public string AuthorId { get; set; }
+        [Required]
+        public DateTime CreatedDate { get; set; }
+        [Required]
         public bool IsClosed { get; set; }
         [Required]
         public bool IsPassworded { get; set; } //Закрытый/Публичный

@@ -9,11 +9,13 @@ namespace WebSurvey.Models.ViewModel
         {
             Questions = questions;
             Id = input.Id;
+            UserId = input.UserId;
+            DateTaken = input.DateTaken;
             SurveyId = input.SurveyId;
             Name = name;
             using (MemoryStream stream = new MemoryStream())
             {
-                stream.Write(Data, 0, Data.Length);
+                stream.Write(input.Data, 0, input.Data.Length);
                 stream.Position = 0;
                 Results = JsonSerializer.Deserialize(stream, typeof(List<Answer>)) as List<Answer>;
             }

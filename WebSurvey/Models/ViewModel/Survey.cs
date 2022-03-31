@@ -7,6 +7,8 @@
             Id = input.Id;
             Name = input.Name;
             Description = input.Description;
+            AuthorId = input.AuthorId;
+            CreatedDate = input.CreatedDate;
             IsAnonimous = input.IsAnonimous;
             IsOneOff = input.IsOneOff;
             IsPassworded = input.IsPassworded;
