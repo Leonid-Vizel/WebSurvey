@@ -10,11 +10,13 @@ namespace WebSurvey.Controllers
     public class SurveyController : Controller
     {
         private SignInManager<IdentityUser> signInManager;
+        private UserManager<IdentityUser> userManager;
         private ApplicationDbContext db;
-        public SurveyController(ApplicationDbContext db, SignInManager<IdentityUser> signInManager)
+        public SurveyController(ApplicationDbContext db, SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
         {
             this.db = db;
             this.signInManager = signInManager;
+            this.userManager = userManager;
         }
 
         public IActionResult Create()
@@ -32,25 +34,6 @@ namespace WebSurvey.Controllers
             Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
             if (foundSurvey != null)
             {
-                //if (foundSurvey.IsPassworded)
-                //{
-                //    if (!foundSurvey.Password.Equals(Password))
-                //    {
-                //        return NotFound();
-                //        //Error message
-                //    }
-                //}
-                //if (!foundSurvey.IsAnonimous || foundSurvey.IsOneOff)
-                //{
-                //    if (true /*Check logged in*/)
-                //    {
-
-                //    }
-                //    if (foundSurvey.IsOneOff)
-                //    {
-                //        //check if 
-                //    }
-                //}
                 return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == Id)));
             }
             else
@@ -86,11 +69,32 @@ namespace WebSurvey.Controllers
             }
         }
 
-        public IActionResult Take(int SurveyId)
+        public IActionResult Take(int SurveyId, string password)
         {
             Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x=>x.Id == SurveyId);
             if (foundSurvey != null)
             {
+                if (foundSurvey.IsClosed)
+                {
+                    return NotFound();
+                }
+                if (!foundSurvey.IsAnonimous || foundSurvey.IsOneOff)
+                {
+                    if (signInManager.IsSignedIn(User))
+                    {
+                        if (foundSurvey.IsOneOff)
+                        {
+                            if (db.Results.Where(x=>x.SurveyId == foundSurvey.Id).All(x=>!x.UserId.Equals(userManager.GetUserId(User))))
+                            {
+                                return NotFound();
+                            }
+                        }
+                    }
+                }
+                if (foundSurvey.IsPassworded && !foundSurvey.Password.Equals(password))
+                {
+                    return NotFound();
+                }
                 List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == SurveyId).ToList();
                 if (foundQuestions.Count() > 0)
                 {
