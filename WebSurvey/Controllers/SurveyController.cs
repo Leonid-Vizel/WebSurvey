@@ -91,7 +91,7 @@ namespace WebSurvey.Controllers
                         }
                     }
                 }
-                if (foundSurvey.IsPassworded && !foundSurvey.Password.Equals(password))
+                if (foundSurvey.IsPassworded && foundSurvey.Password != null && !foundSurvey.Password.Equals(password))
                 {
                     return NotFound();
                 }
