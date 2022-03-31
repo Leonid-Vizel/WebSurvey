@@ -4,11 +4,28 @@
     ViewData["Title"] = Model.Name;
 }
 
+<script>
+    function TogglePassword()
+    {
+        var input = document.getElementById('password');
+
+        if (input.type === 'password')
+        {
+            input.type = 'text';
+        }
+        else
+        {
+            input.type = 'password';
+        }
+    }
+</script>
+
 <h1 class="text-center">Информация об опросе</h1>
 <p>Название: <b>@Model.Name</b></p>
 <p>Описание: <b>@Model.Description</b></p>
-<p class = "p-no-space">Тип опроса:
-    <ul class = "ul-no-space">
+<p class="p-no-space">
+    Тип опроса:
+    <ul class="ul-no-space">
         @if (Model.IsPassworded)
         {
             <li>Запароленный</li>
@@ -39,4 +56,29 @@
 </p>
 <p>Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b></p>
 <hr />
-<a asp-controller="Survey" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Пройти</a>
+@if (Model.IsPassworded)
+{
+    <form method="post">
+        <div class="container">
+            <div class="col-6">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Пароль</span>
+                    </div>
+                    <input asp-for="Password" type="password" id = "password" class="form-control" aria-label="Default">
+                    <div class="input-group-prepend">
+                        <a onmouseover = "TogglePassword()" onmouseout = "TogglePassword()" class="btn btn-outline-secondary">👁️</a>
+                    </div>
+                    <div class="input-group-prepend">
+                        <button type="submit" class="btn btn-outline-secondary">Пройти</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </form>
+}
+else
+{
+    <a asp-controller="Survey" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Пройти</a>
+}

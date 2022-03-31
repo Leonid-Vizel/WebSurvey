@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 using WebSurvey.Data;
 using WebSurvey.Models;
 using WebSurvey.Models.Database;
@@ -29,12 +30,27 @@ namespace WebSurvey.Controllers
             return View();
         }
 
-        public IActionResult Status(int Id, string Password)
+        public IActionResult Status(int Id)
         {
             Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
             if (foundSurvey != null)
             {
                 return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == Id)));
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Status(SurveyStatistics passwordInfo)
+        {
+            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == passwordInfo.Id);
+            if (foundSurvey != null)
+            {
+                return RedirectToAction("Take", new { SurveyId = passwordInfo.Id, password = passwordInfo.Password});
             }
             else
             {
@@ -82,13 +98,14 @@ namespace WebSurvey.Controllers
                 {
                     if (signInManager.IsSignedIn(User))
                     {
-                        if (foundSurvey.IsOneOff)
+                        if (foundSurvey.IsOneOff && !db.Results.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
                         {
-                            if (db.Results.Where(x=>x.SurveyId == foundSurvey.Id).All(x=>!x.UserId.Equals(userManager.GetUserId(User))))
-                            {
-                                return NotFound();
-                            }
+                            return NotFound();
                         }
+                    }
+                    else
+                    {
+                        return NotFound();
                     }
                 }
                 if (foundSurvey.IsPassworded && foundSurvey.Password != null && !foundSurvey.Password.Equals(password))
