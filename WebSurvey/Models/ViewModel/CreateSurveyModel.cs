@@ -1,8 +1,8 @@
 ﻿namespace WebSurvey.Models.ViewModel
 {
-    public class Survey : Database.Survey
+    public class CreateSurveyModel : Database.Survey
     {
-        public Survey(Database.Survey input, Database.SurveyQuestion[] questions)
+        public CreateSurveyModel(Database.Survey input, SurveyQuestion[] questions)
         {
             Id = input.Id;
             Name = input.Name;
@@ -17,6 +17,6 @@
             Questions = questions;
         }
 
-        public Database.SurveyQuestion[] Questions { get; set; }
+        public SurveyQuestion[] Questions { get; set; }
     }
 }

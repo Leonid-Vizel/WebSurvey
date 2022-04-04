@@ -6,22 +6,29 @@ namespace WebSurvey.Models.Database
     {
         [Key]
         public int Id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Это обязательное поле")]
+        [MaxLength(150, ErrorMessage = "Слишком длинное название опроса")]
+        [MinLength(0)]
+        [Display(Name = "Название")]
         public string Name { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Это обязательное поле")]
+        [MaxLength(500, ErrorMessage = "Слишком длинное описание опроса")]
+        [MinLength(0)]
+        [Display(Name = "Описание")]
         public string Description { get; set; }
-        [Required]
         public string AuthorId { get; set; }
-        [Required]
         public DateTime CreatedDate { get; set; }
-        [Required]
         public bool IsClosed { get; set; }
-        [Required]
+        [Display(Name = "Закрытый")]
         public bool IsPassworded { get; set; } //Закрытый/Публичный
+        [DataType(DataType.Password)]
+        [MaxLength(15, ErrorMessage = "Слишком длинный пароль")]
+        [MinLength(5, ErrorMessage = "Слишком короткий пароль")]
+        [Display(Name = "Пароль")]
         public string? Password { get; set; }
-        [Required]
+        [Display(Name = "Анонимный")]
         public bool IsAnonimous { get; set; } //Анонимный/Стандартный
-        [Required]
+        [Display(Name = "Однозаровый")]
         public bool IsOneOff { get; set; } //Однозаровый/Многоразовый
     }
 }

@@ -1,10 +1,8 @@
 ﻿using ClosedXML.Excel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using WebSurvey.Data;
 using WebSurvey.Models;
-using WebSurvey.Models.Answers;
 using WebSurvey.Models.Database;
 using WebSurvey.Models.ViewModel;
 
@@ -24,7 +22,52 @@ namespace WebSurvey.Controllers
 
         public IActionResult Create()
         {
-            return View();
+            if (signInManager.IsSignedIn(User))
+            {
+                return View();
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateSurveyModel builtSurvey)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                if (builtSurvey.Questions.Length > 0)
+                {
+                    if (builtSurvey.Questions.All(x => x.Type == QuestionType.Text || x.Options.Count() > 0))
+                    {
+                        builtSurvey.AuthorId = userManager.GetUserId(User);
+                        builtSurvey.CreatedDate = DateTime.Now;
+                        builtSurvey.IsClosed = false;
+                        await db.Surveys.AddAsync(builtSurvey);
+                        await db.Questions.AddRangeAsync(builtSurvey.Questions);
+                        foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
+                        {
+                            await db.Options.AddRangeAsync(question.Options);
+                        }
+                        await db.SaveChangesAsync();
+                        return RedirectToAction("Status", new { Id = builtSurvey.Id });
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         public IActionResult Status(int Id)

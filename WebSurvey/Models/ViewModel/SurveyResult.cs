@@ -39,18 +39,6 @@ namespace WebSurvey.Models.ViewModel
             }
         }
 
-        public SurveyResult(Survey survey, List<SurveyQuestion> questions)
-        {
-            SurveyId = survey.Id;
-            Name = survey.Name;
-            Results = new List<Answer>();
-            Questions = questions;
-            for (int i = 0; i < questions.Count; i++)
-            {
-                Results.Add(new Answer());
-            }
-        }
-
         public Database.SurveyResult ToDbClass()
         {
             Database.SurveyResult dbResult = new Database.SurveyResult();
