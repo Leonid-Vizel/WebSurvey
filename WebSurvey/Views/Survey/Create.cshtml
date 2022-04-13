@@ -1,42 +1,101 @@
 ﻿@using WebSurvey.Models.ViewModel
 @model CreateSurveyModel
 @{
+    //Model.Questions = new SurveyQuestion[];
     ViewData["Title"] = "Создание опроса";
 }
 
+<script>
+    function OnSelectAnswer(number)
+    {
+        var AnswerSelect = document.getElementById('select-' + number);
+        switch(x) {
+          case '0':  // if (x === 'value1')
+
+          [break]
+          case '1':  // if (x === 'value2')
+
+          [break]
+          case '2':  // if (x === 'value2')
+
+          [break]
+        }
+    }
+</script>
+
 <script id="blockOfStuff" type="text/html">
-    <h5>TEST {questionCount}</h5>
+    <h5 id = "questionHeader-{questionCount}">Вопрос #{questionCount}</h5>
+    <input id = "Questions[{questionCount}].Name" name = "Questions[{questionCount}].Name" class="form-input"/>
+    <select class="form-select" id = "Questions[{questionCount}].Type" name = "Questions[{questionCount}].Type" onchange = "">
+      <option selected>Тип ответа</option>
+      <option value="0" selected>Текст</option>
+      <option value="1">Флажки</option>
+      <option value="2">Радио-кнопки</option>
+    </select>
+    <a class = "btn btn-outline-danger" id = 'btn-delete-{questionCount}' onclick = "DeleteAndCheckIdentifiers({questionCount})">Удалить</a>
 </script>
 
 <script>
-        let questionCount = 0;
+    let questionCount = 0;
 
-        function OnPasswordNeeded()
+    function OnPasswordNeeded()
+    {
+        var hidingBlock = document.getElementById('hidingBlock');
+        if (document.getElementById('checkHidingBlock').checked)
         {
-            var hidingBlock = document.getElementById('hidingBlock');
-            if (document.getElementById('checkHidingBlock').checked)
-            {
-                hidingBlock.removeAttribute('hidden');
-            }
-            else
-            {
-                hidingBlock.setAttribute('hidden','hidden');
-            }
+            hidingBlock.removeAttribute('hidden');
         }
-
-        function AddQuestion()
+        else
         {
-            var div = document.createElement('div');
-            div.setAttribute('class', 'container');
-            var elementAfter = document.getElementById('addQuestionBtn');
-            div.innerHTML = document.getElementById('blockOfStuff').innerHTML;
-
-            div.innerHTML = div.innerHTML
-            .replace(/{questionCount}/g, questionCount);
-            questionCount = questionCount + 1;
-
-            elementAfter.insertAdjacentElement('beforebegin', div);
+            hidingBlock.setAttribute('hidden','hidden');
         }
+    }
+
+    function RenameAll(element, id)
+    {
+        var identificator = element.id;
+        element.setAttribute('id', id);
+        //H5 edititng
+        var element = document.getElementById('questionHeader-' + identificator);
+        element.innerHTML = 'Вопрос #' + id;
+        element.setAttribute('id', 'questionHeader-' + id);
+        //Name Input
+        element = document.getElementById('Questions[' + identificator + '].Name');
+        element.setAttribute('id', 'Questions[' + id + '].Name');
+        element.setAttribute('name', 'Questions[' + id + '].Name');
+        //Type input
+        element = document.getElementById('Questions[' + identificator + '].Type');
+        element.setAttribute('id', 'Questions[' + id + '].Type');
+        element.setAttribute('name', 'Questions[' + id + '].Type');
+        //Delete button
+        document.getElementById('btn-delete-' + identificator).setAttribute('id', 'btn-delete-' + id);
+    }
+
+    function DeleteAndCheckIdentifiers(questionNumber)
+    {
+        $('#' + questionNumber).remove();
+        var elements = document.getElementsByName('questionContainer');
+        for (var i = 0; i < elements.length; i++)
+        {
+            RenameAll(elements[i], i);
+        }
+    }
+
+    function AddQuestion()
+    {
+        var div = document.createElement('div');
+        div.setAttribute('class', 'container');
+        div.setAttribute('name', 'questionContainer');
+        div.setAttribute('id', questionCount);
+        var elementAfter = document.getElementById('addQuestionBtn');
+        div.innerHTML = document.getElementById('blockOfStuff').innerHTML;
+
+        div.innerHTML = div.innerHTML
+        .replace(/{questionCount}/g, questionCount);
+        questionCount = questionCount + 1;
+
+        elementAfter.insertAdjacentElement('beforebegin', div);
+    }
 </script>
 
 <h2>Создание опроса</h2>
@@ -57,22 +116,25 @@
 </div>
 <hr />
 <h2>Настройки</h2>
-<div class="form-check">
-    <input asp-for="IsAnonimous" class="form-check-input" type="checkbox" id="anonBox" onchange="CheckAnonimOneOff()">
-    <label asp-for="IsAnonimous" class="form-check-label"></label>
-</div>
-<div class="form-check">
-    <input asp-for="IsOneOff" class="form-check-input" type="checkbox" id="oneBox" onchange="CheckAnonimOneOff()">
-    <label asp-for="IsOneOff" class="form-check-label"></label>
-</div>
-<div class="form-check">
-    <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
-    <label asp-for="IsPassworded" class="form-check-label"></label>
-</div>
-<div id="hidingBlock" hidden="hidden">
-    <label asp-for="Password"></label>
-    <input asp-for="Password" class="form-control" />
-    <span asp-validation-for="Password"></span>
-</div>
-<hr />
-<a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
+<form method="post">
+    <div class="form-check">
+        <input asp-for="IsAnonimous" class="form-check-input" type="checkbox" id="anonBox" onchange="CheckAnonimOneOff()">
+        <label asp-for="IsAnonimous" class="form-check-label"></label>
+    </div>
+    <div class="form-check">
+        <input asp-for="IsOneOff" class="form-check-input" type="checkbox" id="oneBox" onchange="CheckAnonimOneOff()">
+        <label asp-for="IsOneOff" class="form-check-label"></label>
+    </div>
+    <div class="form-check">
+        <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
+        <label asp-for="IsPassworded" class="form-check-label"></label>
+    </div>
+    <div id="hidingBlock" hidden="hidden">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password"></span>
+    </div>
+    <hr />
+    <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
+    <button type="submit" class="btn btn-outline-primary">SEND</button>
+</form>

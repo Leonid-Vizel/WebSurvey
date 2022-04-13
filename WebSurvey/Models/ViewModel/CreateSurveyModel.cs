@@ -17,6 +17,8 @@
             Questions = questions;
         }
 
+        public CreateSurveyModel() { }
+
         public SurveyQuestion[] Questions { get; set; }
     }
 }

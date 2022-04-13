@@ -11,6 +11,8 @@
             Options = options;
         }
 
+        public SurveyQuestion() { }
+
         public SurveyQuestionOption[] Options { get; set; }
     }
 }
