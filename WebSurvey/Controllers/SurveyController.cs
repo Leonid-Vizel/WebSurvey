@@ -40,16 +40,29 @@ namespace WebSurvey.Controllers
             {
                 if (builtSurvey.Questions.Length > 0)
                 {
-                    if (builtSurvey.Questions.All(x => x.Type == QuestionType.Text || x.Options.Count() > 0))
+                    if (builtSurvey.Questions.All(x => x.Type == QuestionType.Text || (x.Options != null && x.Options.Count() > 0)))
                     {
                         builtSurvey.AuthorId = userManager.GetUserId(User);
                         builtSurvey.CreatedDate = DateTime.Now;
                         builtSurvey.IsClosed = false;
                         await db.Surveys.AddAsync(builtSurvey);
-                        await db.Questions.AddRangeAsync(builtSurvey.Questions);
+                        await db.SaveChangesAsync(); //For Id population
                         foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
                         {
-                            await db.Options.AddRangeAsync(question.Options);
+                            question.SurveyId = builtSurvey.Id;
+                        }
+                        await db.Questions.AddRangeAsync(builtSurvey.Questions);
+                        await db.SaveChangesAsync(); //For Id population
+                        foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
+                        {
+                            if (question.Options != null)
+                            {
+                                foreach (SurveyQuestionOption option in question.Options)
+                                {
+                                    option.QuestionId = question.Id;
+                                }
+                                await db.Options.AddRangeAsync(question.Options);
+                            }
                         }
                         await db.SaveChangesAsync();
                         return RedirectToAction("Status", new { Id = builtSurvey.Id });

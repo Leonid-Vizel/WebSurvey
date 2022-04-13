@@ -5,34 +5,39 @@
     ViewData["Title"] = "Создание опроса";
 }
 
-<script>
-    function OnSelectAnswer(number)
-    {
-        var AnswerSelect = document.getElementById('select-' + number);
-        switch(x) {
-          case '0':  // if (x === 'value1')
+<script id="QuestionBlock" type="text/html">
+    <div class = "row">
+        <div class = "col-11">
+            <h5 id = "questionHeader-{questionNumber}">Вопрос #{questionNumber}</h5>
+        </div>
+        <div class = "col-1 text-end">
+            <a class = "btn btn-outline-danger" id = 'btn-delete-{questionNumber}' onclick = "DeleteAndCheckQuestion({questionNumber})"><i class="bi bi-x-circle-fill"></i></a>
+        </div>
+    </div>
 
-          [break]
-          case '1':  // if (x === 'value2')
-
-          [break]
-          case '2':  // if (x === 'value2')
-
-          [break]
-        }
-    }
+    <div class="input-group mb-3">
+        <input id = "Questions[{questionNumber}].Name" name = "Questions[{questionNumber}].Name" class="form-control" placeholder = "Название"/>
+        <div class="input-group-append">
+            <select class="form-select" id = "Questions[{questionNumber}].Type" name = "Questions[{questionNumber}].Type" onchange = "OnSelectAnswer({questionNumber})">
+                <option value="0" selected>Текст</option>
+                <option value="1">Флажки</option>
+                <option value="2">Радио-кнопки</option>
+            </select>
+        </div>
+    </div>
 </script>
 
-<script id="blockOfStuff" type="text/html">
-    <h5 id = "questionHeader-{questionCount}">Вопрос #{questionCount}</h5>
-    <input id = "Questions[{questionCount}].Name" name = "Questions[{questionCount}].Name" class="form-input"/>
-    <select class="form-select" id = "Questions[{questionCount}].Type" name = "Questions[{questionCount}].Type" onchange = "">
-      <option selected>Тип ответа</option>
-      <option value="0" selected>Текст</option>
-      <option value="1">Флажки</option>
-      <option value="2">Радио-кнопки</option>
-    </select>
-    <a class = "btn btn-outline-danger" id = 'btn-delete-{questionCount}' onclick = "DeleteAndCheckIdentifiers({questionCount})">Удалить</a>
+<script id="OptionBlock" type="text/html">
+    <div class="input-group mb-3" style = "margin-left:20px;">
+        <input id = "Questions[{questionNumber}].Options[{optionNumber}].Text" name = "Questions[{questionNumber}].Options[{optionNumber}].Text" class="form-control" placeholder = "Название опции"/>
+        <div class="input-group-append">
+            <a class = "btn btn-outline-danger" id = "delete-question-{questionNumber}-option-{optionNumber}" onclick = 'DeleteAndCheckOption({questionNumber},{optionNumber})'><i class="bi bi-x-circle-fill"></i></a>
+        </div>
+    </div>
+</script>
+
+<script id="OptionAddBtnBlock" type="text/html">
+    <a class="btn btn-outline-info" id = "addOptionBtn-{questionNumber}" onclick = "AddOption({questionNumber})">Добавить опцию</a>
 </script>
 
 <script>
@@ -51,7 +56,45 @@
         }
     }
 
-    function RenameAll(element, id)
+    function OnSelectAnswer(number)
+    {
+        var AnswerSelect = document.getElementById('Questions[' + number + '].Type');
+            switch(AnswerSelect.options[AnswerSelect.selectedIndex].value) {
+          case '0':  //TEXT
+            //Remove RADIO and CHECK
+            var destroyElement = document.getElementById('addOptionBtn-' + number);
+            if (destroyElement != null)
+            {
+                destroyElement.remove();
+            }
+            var destroyOptions = document.getElementsByName('optionContainerOf' + number);
+            if (destroyOptions.length > 0)
+            {
+                if (confirm('При переключении данного вопроса на текст, все опции будут стёрты. Подтвердите действие.'))
+                {
+                    while (destroyOptions.length > 0)
+                    {
+                        destroyOptions[0].remove();
+                    }
+                }
+            }
+          break;
+          case '1':
+          case '2':
+            //'Questions[' + number + '].Options[0].Text';
+            //'btn-delete-{questionCount}-option-{option}'
+            if (document.getElementById('addOptionBtn-' + number) == null)
+            {
+                var div = document.createElement('div');
+                div.innerHTML = document.getElementById('OptionAddBtnBlock').innerHTML.replace(/{questionNumber}/g, number);
+                var insertAfter = document.getElementById(number);
+                insertAfter.insertAdjacentElement('afterend', div);
+            }
+          break;
+        }
+    }
+
+    function RenameAllQuestions(element, id)
     {
         var identificator = element.id;
         element.setAttribute('id', id);
@@ -67,56 +110,131 @@
         element = document.getElementById('Questions[' + identificator + '].Type');
         element.setAttribute('id', 'Questions[' + id + '].Type');
         element.setAttribute('name', 'Questions[' + id + '].Type');
-        //Delete button
-        document.getElementById('btn-delete-' + identificator).setAttribute('id', 'btn-delete-' + id);
-    }
-
-    function DeleteAndCheckIdentifiers(questionNumber)
-    {
-        $('#' + questionNumber).remove();
-        var elements = document.getElementsByName('questionContainer');
+        element.setAttribute('onchange', 'OnSelectAnswer(' + id + ')');
+        //'Delete' button
+        element = document.getElementById('btn-delete-' + identificator);
+        element.setAttribute('id', 'btn-delete-' + id);
+        element.setAttribute('onclick', 'DeleteAndCheckQuestion(' + id +')');
+        //'Add Option' button
+        element = document.getElementById('addOptionBtn-' + identificator);
+        if (element != null)
+        {
+            element.setAttribute('id', 'addOptionBtn-' + id);
+            element.setAttribute('onclick', 'AddOption(' + id +')');
+        }
+        //Options
+        containers = document.getElementsByName('optionContainerOf' + identificator);
+        elements = document.querySelectorAll('[id^="Questions[' + identificator + '].Options["]');
+        buttons = document.querySelectorAll('[id^="delete-question-' + identificator + '-option-"]');
         for (var i = 0; i < elements.length; i++)
         {
-            RenameAll(elements[i], i);
+            elements[i].setAttribute('id', 'Questions[' + id + '].Options[' + i + '].Text');
+            elements[i].setAttribute('name', 'Questions[' + id + '].Options[' + i + '].Text');
+            buttons[i].setAttribute('id', 'delete-question-' + id + '-option-' + i);
+            buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + id + ',' + i + ')');
+            containers[0].setAttribute('id', 'question-' + id + '-option-' + i);
+            containers[0].setAttribute('name', 'optionContainerOf' + id);
+        }
+    }
+
+    function RenameAllOptions(questionNumber)
+    {
+        containers = document.getElementsByName('optionContainerOf' + questionNumber);
+        elements = document.querySelectorAll('[id^="Questions[' + questionNumber + '].Options["]');
+        buttons = document.querySelectorAll('[id^="delete-question-' + questionNumber + '-option-"]');
+        for (var i = 0; i < elements.length; i++)
+        {
+            elements[i].setAttribute('id', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
+            elements[i].setAttribute('name', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
+            buttons[i].setAttribute('id', 'delete-question-' + questionNumber + '-option-' + i);
+            buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + questionNumber + ',' + i + ')');
+            containers[i].setAttribute('id', 'question-' + questionNumber + '-option-' + i);
+        }
+    }
+
+    function DeleteAndCheckOption(questionNumber, optionNumber)
+    {
+       element = document.getElementById('question-'+questionNumber+'-option-'+optionNumber);
+       element.remove();
+       RenameAllOptions(questionNumber);
+    }
+
+    function DeleteAndCheckQuestion(questionNumber)
+    {
+        var destroyOptions = document.getElementsByName('optionContainerOf' + questionNumber);
+        while (destroyOptions.length > 0)
+        {
+            destroyOptions[0].remove();
+        }
+        var destroyElement = document.getElementById('addOptionBtn-' + questionNumber);
+        if (destroyElement != null)
+        {
+            destroyElement.remove();
+        }
+        $('#' + questionNumber).remove();
+        var elements = document.getElementsByName('questionContainer');
+        questionCount = elements.length;
+        for (var i = 0; i < elements.length; i++)
+        {
+            RenameAllQuestions(elements[i], i);
         }
     }
 
     function AddQuestion()
     {
         var div = document.createElement('div');
-        div.setAttribute('class', 'container');
+        div.setAttribute('class', 'container mt-3');
         div.setAttribute('name', 'questionContainer');
         div.setAttribute('id', questionCount);
         var elementAfter = document.getElementById('addQuestionBtn');
-        div.innerHTML = document.getElementById('blockOfStuff').innerHTML;
+        div.innerHTML = document.getElementById('QuestionBlock').innerHTML;
 
         div.innerHTML = div.innerHTML
-        .replace(/{questionCount}/g, questionCount);
+        .replace(/{questionNumber}/g, questionCount);
         questionCount = questionCount + 1;
 
         elementAfter.insertAdjacentElement('beforebegin', div);
+        div.scrollIntoView();
+    }
+
+    function AddOption(questionNumber)
+    {
+        var countOfOptions = document.getElementsByName('optionContainerOf' + questionNumber).length;
+        var div = document.createElement('div');
+        div.setAttribute('class', 'container');
+        div.setAttribute('name', 'optionContainerOf' + questionNumber);
+        div.setAttribute('id', 'question-'+questionNumber+'-option-'+countOfOptions);
+        var elementAfter = document.getElementById('addOptionBtn-' + questionNumber);
+        div.innerHTML = document.getElementById('OptionBlock').innerHTML;
+
+        div.innerHTML = div.innerHTML.replace(/{questionNumber}/g, questionNumber);
+        div.innerHTML = div.innerHTML.replace(/{optionNumber}/g, countOfOptions);
+
+        elementAfter.insertAdjacentElement('beforebegin', div);
+        div.scrollIntoView();
     }
 </script>
 
 <h2>Создание опроса</h2>
 <hr />
-<div class="container">
-    <div class="row">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name"></span>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <label asp-for="Description"></label>
-        @Html.TextAreaFor(x=>x.Description)
-        <span asp-validation-for="Description"></span>
-    </div>
-</div>
-<hr />
-<h2>Настройки</h2>
 <form method="post">
+    <div class="container">
+        <div class="row">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name"></span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <label asp-for="Description"></label>
+            @Html.TextAreaFor(x=>x.Description)
+            <span asp-validation-for="Description"></span>
+        </div>
+    </div>
+    <hr />
+    <h2>Настройки</h2>
+
     <div class="form-check">
         <input asp-for="IsAnonimous" class="form-check-input" type="checkbox" id="anonBox" onchange="CheckAnonimOneOff()">
         <label asp-for="IsAnonimous" class="form-check-label"></label>
