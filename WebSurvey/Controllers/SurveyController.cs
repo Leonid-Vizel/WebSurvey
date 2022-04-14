@@ -85,7 +85,7 @@ namespace WebSurvey.Controllers
 
         public IActionResult Status(int Id)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
             if (foundSurvey != null)
             {
                 return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == Id)));
@@ -100,10 +100,27 @@ namespace WebSurvey.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Status(SurveyStatistics passwordInfo)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == passwordInfo.Id);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == passwordInfo.Id);
             if (foundSurvey != null)
             {
-                return RedirectToAction("Take", new { SurveyId = passwordInfo.Id, password = passwordInfo.Password });
+                if (foundSurvey.Password == null)
+                {
+                    return RedirectToAction("Take", new { SurveyId = passwordInfo.Id});
+                }
+                else
+                {
+                    if (foundSurvey.Password.Equals(passwordInfo.Password))
+                    {
+                        return RedirectToAction("Take", new { SurveyId = passwordInfo.Id, password = passwordInfo.Password });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Password", "Неверный пароль");
+                        SurveyStatistics newStatistics = new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == foundSurvey.Id));
+                        newStatistics.Password = passwordInfo.Password;
+                        return View(newStatistics);
+                    }
+                }
             }
             else
             {
@@ -140,7 +157,7 @@ namespace WebSurvey.Controllers
 
         public IActionResult Take(int SurveyId, string password)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == SurveyId);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == SurveyId);
             if (foundSurvey != null)
             {
                 if (foundSurvey.IsClosed)
@@ -216,7 +233,7 @@ namespace WebSurvey.Controllers
         [ActionName("Close")]
         public async Task<IActionResult> ClosePOST(int Id)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
             if (foundSurvey != null)
             {
                 foundSurvey.IsClosed = true;
@@ -240,7 +257,7 @@ namespace WebSurvey.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> DeletePOST(int Id)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
             if (foundSurvey != null)
             {
                 db.Surveys.Remove(foundSurvey);
@@ -271,7 +288,7 @@ namespace WebSurvey.Controllers
         [ActionName("Results")]
         public IActionResult ResultsPOST(int Id)
         {
-            Models.Database.Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
             if (foundSurvey != null)
             {
                 List<Models.ViewModel.SurveyResult> clearResults = new List<Models.ViewModel.SurveyResult>();
