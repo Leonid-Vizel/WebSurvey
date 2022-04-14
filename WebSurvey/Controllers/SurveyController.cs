@@ -28,7 +28,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
 
@@ -69,17 +69,17 @@ namespace WebSurvey.Controllers
                     }
                     else
                     {
-                        return NotFound();
+                        return RedirectToAction(controllerName: "Error", actionName: "CorruptSurvey");
                     }
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction(controllerName: "Error", actionName: "CorruptSurvey");
                 }
             }
             else
             {
-                return NotFound();
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
 
@@ -92,7 +92,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound","Error");
             }
         }
 
@@ -107,7 +107,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
 
@@ -145,7 +145,7 @@ namespace WebSurvey.Controllers
             {
                 if (foundSurvey.IsClosed)
                 {
-                    return NotFound();
+                    return RedirectToAction("SurveyClosed", "Error");
                 }
                 if (!foundSurvey.IsAnonimous || foundSurvey.IsOneOff)
                 {
@@ -153,17 +153,17 @@ namespace WebSurvey.Controllers
                     {
                         if (foundSurvey.IsOneOff && !db.Results.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
                         {
-                            return NotFound();
+                            return RedirectToAction("AlreadyUsed", "Error");
                         }
                     }
                     else
                     {
-                        return NotFound();
+                        return RedirectToAction("NeedToSignIn", "Error");
                     }
                 }
                 if (foundSurvey.IsPassworded && foundSurvey.Password != null && !foundSurvey.Password.Equals(password))
                 {
-                    return NotFound();
+                    return RedirectToAction("WrongPassword", "Error");
                 }
                 List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == SurveyId).ToList();
                 if (foundQuestions.Count() > 0)
@@ -178,7 +178,7 @@ namespace WebSurvey.Controllers
                         }
                         else
                         {
-                            return NotFound();
+                            return RedirectToAction("CorruptSurvey", "Error");
                         }
                     }
                     Models.ViewModel.SurveyResult emptyResults = new Models.ViewModel.SurveyResult(foundSurvey, questionList);
@@ -186,12 +186,12 @@ namespace WebSurvey.Controllers
                 }
                 else
                 {
-                    return NotFound();
+                    return RedirectToAction("CorruptSurvey", "Error");
                 }
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
 
@@ -202,7 +202,7 @@ namespace WebSurvey.Controllers
         {
             db.Results.Add(res.ToDbClass());
             db.SaveChanges();
-            return NotFound();
+            return RedirectToAction("Index", "Home");
         }
 
         public IActionResult Close(int Id)
@@ -226,7 +226,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
 
@@ -256,7 +256,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
 
@@ -335,7 +335,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return NotFound();
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
     }

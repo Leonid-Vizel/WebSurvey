@@ -25,7 +25,9 @@
 
 <form method="post">
     <h5>Введите номер опроса:</h5>
-    <input asp-for="Search" class="form-control mb-1" aria-required="true"/>
-    <span asp-validation-for="Search"></span>
+    <div class="container">
+        <input asp-for="Search" class="form-control mb-1" aria-required="true" />
+        <span asp-validation-for="Search" class = "text-danger"></span>
+    </div>
     <button type="submit" class="btn btn-outline-primary">Пройти</button>
 </form>
