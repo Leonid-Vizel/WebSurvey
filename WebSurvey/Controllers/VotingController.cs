@@ -35,6 +35,11 @@ namespace WebSurvey.Controllers
         {
             if (ModelState.IsValid)
             {
+                //if (model.Options == null || model.Options.Count <= 1)
+                //{
+                //    ModelState.AddModelError("Options", "У опроса должены быть как минимум 2 опции");
+                //    return View(model);
+                //}
                 await db.Votings.AddAsync(model);
                 await db.SaveChangesAsync();
                 foreach (VotingOption option in model.Options)
