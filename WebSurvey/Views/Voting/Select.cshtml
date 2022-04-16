@@ -1,0 +1,20 @@
+﻿@using WebSurvey.Models.Voting
+@model VotingSearchModel
+@{
+    ViewData["Title"] = "Выбор голосования";
+}
+
+<div class="text-center">
+    <h1>Голосования</h1>
+</div>
+
+<h6>Голосования на нашей платформе состоят из одного вопроса и могут быть либо закрытыми <i>(для них требуется пароль)</i>, либо открытыми.</h6>
+
+<form method="post">
+    <h5>Введите номер опроса:</h5>
+    <div class="container">
+        <input asp-for="Search" class="form-control mb-1" aria-required="true" />
+        <span asp-validation-for="Search" class = "text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-outline-primary">Пройти</button>
+</form>

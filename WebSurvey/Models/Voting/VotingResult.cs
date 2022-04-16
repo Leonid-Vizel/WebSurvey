@@ -12,15 +12,17 @@ namespace WebSurvey.Models.Voting
         public string UserId { get; set; }
         [Required]
         public DateTime CreatedDate { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Выберите один из вариантов")]
         public string Answer { get; set; }
 
+        public Voting voting;
         public List<VotingOption> options;
 
         public VotingResult() { }
 
-        public VotingResult(List<VotingOption> options)
+        public VotingResult(Voting voting, List<VotingOption> options)
         {
+            this.voting = voting;
             this.options = options;
         }
     }

@@ -155,7 +155,7 @@ namespace WebSurvey.Controllers
             }
         }
 
-        public IActionResult Take(int SurveyId, string password)
+        public IActionResult Take(int SurveyId, string Password)
         {
             Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == SurveyId);
             if (foundSurvey != null)
@@ -178,7 +178,7 @@ namespace WebSurvey.Controllers
                         return RedirectToAction("NeedToSignIn", "Error");
                     }
                 }
-                if (foundSurvey.IsPassworded && foundSurvey.Password != null && !foundSurvey.Password.Equals(password))
+                if (foundSurvey.IsPassworded && foundSurvey.Password != null && !foundSurvey.Password.Equals(Password))
                 {
                     return RedirectToAction("WrongPassword", "Error");
                 }

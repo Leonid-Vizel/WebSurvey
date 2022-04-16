@@ -1,0 +1,27 @@
+﻿@using WebSurvey.Models.ViewModel
+@using WebSurvey.Models.Voting
+@model VotingResult
+@{
+    ViewData["Title"] = Model.voting.Name;
+}
+
+<h1 class="text-center">@Model.voting.Name</h1>
+<form method="post">
+    <h3>Пожалуйста, выберите один из вариантов:</h3>
+    @for (int i = 0; i < Model.options.Count(); i++)
+    {
+        <div class="form-check">
+            <input asp-for="Answer" class="form-check-input" type="radio" value="@Model.options[i].Text">
+            <label class="form-check-label">@Model.options[i].Text</label>
+        </div>
+    }
+    <div class="text-danger">
+        <span asp-validation-for="Answer"></span>
+    </div>
+    <button type="submit" class="btn btn-outline-primary">Отправить результаты</button>
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
