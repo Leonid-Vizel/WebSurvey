@@ -1,5 +1,6 @@
 ﻿@using WebSurvey.Models.ViewModel
-@model SurveyStatistics
+@using WebSurvey.Models.Voting
+@model VotingStatistics
 @{
     ViewData["Title"] = Model.Name;
 }
@@ -20,40 +21,17 @@
     }
 </script>
 
-<h1 class="text-center">Информация об опросе</h1>
+<h1 class="text-center">Информация о голосовании</h1>
 <p>Название: <b>@Model.Name</b></p>
 <p>Описание: <b>@Model.Description</b></p>
-<p class="p-no-space">
-    Тип опроса:
-    <ul class="ul-no-space">
-        @if (Model.IsPassworded)
-        {
-            <li><b>Запароленный</b></li>
-        }
-        else
-        {
-            <li><b>Публичный</b></li>
-        }
-
-        @if (Model.IsAnonimous)
-        {
-            <li><b>Анонимный</b></li>
-        }
-        else
-        {
-            <li>Стандартный</li>
-        }
-
-        @if (Model.IsOneOff)
-        {
-            <li>Одноразовый</li>
-        }
-        else
-        {
-            <li>Многоразовый</li>
-        }
-    </ul>
-</p>
+@if (Model.IsPassworded)
+{
+    <p>Тип опроса: <b>Запароленный</b></p>
+}
+else
+{
+    <p>Тип опроса: <b>Публичный</b></p>
+}
 <p>Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b></p>
 <hr />
 @if (Model.IsPassworded)
@@ -65,12 +43,12 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Пароль</span>
                     </div>
-                    <input asp-for="Password" type="password" id = "password" class="form-control" aria-label="Default">
+                    <input asp-for="Password" type="password" id="password" class="form-control" aria-label="Default">
                     <div class="input-group-prepend">
-                        <a onmouseover = "TogglePassword()" onmouseout = "TogglePassword()" class="btn btn-outline-secondary">👁️</a>
+                        <a onmouseover="TogglePassword()" onmouseout="TogglePassword()" class="btn btn-outline-secondary">👁️</a>
                     </div>
                     <div class="input-group-prepend">
-                        <button type="submit" class="btn btn-outline-secondary">Пройти</button>
+                        <button type="submit" class="btn btn-outline-secondary">Проголосовать</button>
                     </div>
                 </div>
             </div>
@@ -80,5 +58,5 @@
 }
 else
 {
-    <a asp-controller="Survey" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Пройти</a>
+    <a asp-controller="Voting" asp-action="Take" asp-route-SurveyId="@Model.Id" class="btn btn-outline-primary">Проголосовать</a>
 }

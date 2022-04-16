@@ -1,4 +1,4 @@
-﻿namespace WebSurvey.Models.Answers
+﻿namespace WebSurvey.Models
 {
     public class Answer
     {

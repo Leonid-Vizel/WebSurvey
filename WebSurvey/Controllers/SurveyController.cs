@@ -51,7 +51,7 @@ namespace WebSurvey.Controllers
                         {
                             question.SurveyId = builtSurvey.Id;
                         }
-                        await db.Questions.AddRangeAsync(builtSurvey.Questions);
+                        await db.SurveyQuestions.AddRangeAsync(builtSurvey.Questions);
                         await db.SaveChangesAsync(); //For Id population
                         foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
                         {
@@ -61,7 +61,7 @@ namespace WebSurvey.Controllers
                                 {
                                     option.QuestionId = question.Id;
                                 }
-                                await db.Options.AddRangeAsync(question.Options);
+                                await db.SurveyQuestionOptions.AddRangeAsync(question.Options);
                             }
                         }
                         await db.SaveChangesAsync();
@@ -88,7 +88,7 @@ namespace WebSurvey.Controllers
             Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
             if (foundSurvey != null)
             {
-                return View(new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == Id)));
+                return View(new SurveyStatistics(foundSurvey, db.SurveyResults.Count(x => x.SurveyId == Id)));
             }
             else
             {
@@ -116,7 +116,7 @@ namespace WebSurvey.Controllers
                     else
                     {
                         ModelState.AddModelError("Password", "Неверный пароль");
-                        SurveyStatistics newStatistics = new SurveyStatistics(foundSurvey, db.Results.Count(x => x.SurveyId == foundSurvey.Id));
+                        SurveyStatistics newStatistics = new SurveyStatistics(foundSurvey, db.SurveyResults.Count(x => x.SurveyId == foundSurvey.Id));
                         newStatistics.Password = passwordInfo.Password;
                         return View(newStatistics);
                     }
@@ -168,7 +168,7 @@ namespace WebSurvey.Controllers
                 {
                     if (signInManager.IsSignedIn(User))
                     {
-                        if (foundSurvey.IsOneOff && !db.Results.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
+                        if (foundSurvey.IsOneOff && !db.SurveyResults.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
                         {
                             return RedirectToAction("AlreadyUsed", "Error");
                         }
@@ -182,13 +182,13 @@ namespace WebSurvey.Controllers
                 {
                     return RedirectToAction("WrongPassword", "Error");
                 }
-                List<Models.Database.SurveyQuestion> foundQuestions = db.Questions.Where(x => x.SurveyId == SurveyId).ToList();
+                List<Models.Database.SurveyQuestion> foundQuestions = db.SurveyQuestions.Where(x => x.SurveyId == SurveyId).ToList();
                 if (foundQuestions.Count() > 0)
                 {
                     List<Models.ViewModel.SurveyQuestion> questionList = new List<Models.ViewModel.SurveyQuestion>(foundQuestions.Count());
                     foreach (Models.Database.SurveyQuestion question in foundQuestions)
                     {
-                        IEnumerable<SurveyQuestionOption> options = db.Options.Where(x => x.QuestionId == question.Id);
+                        IEnumerable<SurveyQuestionOption> options = db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id);
                         if (question.Type == QuestionType.Text || options.Count() > 0)
                         {
                             questionList.Add(new Models.ViewModel.SurveyQuestion(question, options.ToArray()));
@@ -217,7 +217,7 @@ namespace WebSurvey.Controllers
         [ActionName("Take")]
         public IActionResult TakePOST(Models.ViewModel.SurveyResult res)
         {
-            db.Results.Add(res.ToDbClass());
+            db.SurveyResults.Add(res.ToDbClass());
             db.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
@@ -261,13 +261,13 @@ namespace WebSurvey.Controllers
             if (foundSurvey != null)
             {
                 db.Surveys.Remove(foundSurvey);
-                Models.Database.SurveyQuestion[] arrayToDelete = db.Questions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
+                Models.Database.SurveyQuestion[] arrayToDelete = db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
                 foreach (Models.Database.SurveyQuestion question in arrayToDelete)
                 {
-                    db.RemoveRange(db.Options.Where(x => x.QuestionId == question.Id));
+                    db.RemoveRange(db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id));
                 }
                 db.RemoveRange(arrayToDelete);
-                db.RemoveRange(db.Results.Where(x => x.SurveyId == foundSurvey.Id));
+                db.RemoveRange(db.SurveyResults.Where(x => x.SurveyId == foundSurvey.Id));
                 await db.SaveChangesAsync();
                 return RedirectToAction(controllerName: "Home", actionName: "Index");
             }
@@ -293,11 +293,11 @@ namespace WebSurvey.Controllers
             {
                 List<Models.ViewModel.SurveyResult> clearResults = new List<Models.ViewModel.SurveyResult>();
                 List<Models.ViewModel.SurveyQuestion> clearSurveyQuestions = new List<Models.ViewModel.SurveyQuestion>();
-                foreach (Models.Database.SurveyQuestion question in db.Questions.Where(x => x.SurveyId == foundSurvey.Id))
+                foreach (Models.Database.SurveyQuestion question in db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id))
                 {
                     clearSurveyQuestions.Add(new Models.ViewModel.SurveyQuestion(question, null));
                 }
-                foreach (Models.Database.SurveyResult result in db.Results.Where(x => x.SurveyId == foundSurvey.Id))
+                foreach (Models.Database.SurveyResult result in db.SurveyResults.Where(x => x.SurveyId == foundSurvey.Id))
                 {
                     clearResults.Add(new Models.ViewModel.SurveyResult(result, foundSurvey.Name, clearSurveyQuestions));
                 }

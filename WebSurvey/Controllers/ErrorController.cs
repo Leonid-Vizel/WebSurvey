@@ -9,12 +9,21 @@ namespace WebSurvey.Controllers
             return View();
         }
 
+        public IActionResult CorruptVoting()
+        {
+            return View();
+        }
+
         public IActionResult NeedToSignIn(string returnUrl)
         {
             return View();
         }
 
         public IActionResult SurveyNotFound()
+        {
+            return View();
+        }
+        public IActionResult VotingNotFound()
         {
             return View();
         }
@@ -25,6 +34,11 @@ namespace WebSurvey.Controllers
         }
 
         public IActionResult SurveyClosed()
+        {
+            return View();
+        }
+
+        public IActionResult VotingClosed()
         {
             return View();
         }

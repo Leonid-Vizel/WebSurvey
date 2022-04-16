@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using WebSurvey.Models.Answers;
 
 namespace WebSurvey.Models.ViewModel
 {
