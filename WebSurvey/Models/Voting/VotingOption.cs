@@ -6,9 +6,8 @@ namespace WebSurvey.Models.Voting
     {
         [Key]
         public int Id { get; set; }
-        [Required]
         public int VotingId { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Укажите название опциии или удалите её")]
         public string Text { get; set; }
     }
 }

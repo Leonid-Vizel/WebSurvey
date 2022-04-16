@@ -47,5 +47,10 @@ namespace WebSurvey.Controllers
         {
             return View();
         }
+
+        public IActionResult VotingUsed()
+        {
+            return View();
+        }
     }
 }

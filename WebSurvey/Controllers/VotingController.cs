@@ -31,9 +31,24 @@ namespace WebSurvey.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(VotingCreateModel model)
+        public async Task<IActionResult> Create(VotingCreateModel model)
         {
-            throw new NotImplementedException();
+            if (ModelState.IsValid)
+            {
+                await db.Votings.AddAsync(model);
+                await db.SaveChangesAsync();
+                foreach (VotingOption option in model.Options)
+                {
+                    option.VotingId = model.Id;
+                    await db.VotingOptions.AddAsync(option);
+                }
+                await db.SaveChangesAsync();
+                return RedirectToAction("Status", new { Id = model.Id });
+            }
+            else
+            {
+                return View(model);
+            }
         }
 
         public IActionResult Status(int Id)
@@ -70,6 +85,45 @@ namespace WebSurvey.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Status(VotingStatistics model)
+        {
+            Voting? foundVoting = db.Votings.FirstOrDefault(s => s.Id == model.Id);
+            if (foundVoting != null)
+            {
+                if (db.VotingResults.Count(x => x.VotingId == foundVoting.Id && x.UserId.Equals(userManager.GetUserId(User))) > 0)
+                {
+                    ModelState.AddModelError("Password", "Вы уже приняли участие в этом голосовании");
+                    VotingStatistics newStatistics = new VotingStatistics(foundVoting, db.VotingResults.Count(x => x.VotingId == foundVoting.Id));
+                    newStatistics.Password = model.Password;
+                    return View(newStatistics);
+                }
+                if (foundVoting.Password == null)
+                {
+                    return RedirectToAction("Take", new { VotingId = model.Id });
+                }
+                else
+                {
+                    if (foundVoting.Password.Equals(model.Password))
+                    {
+                        return RedirectToAction("Take", new { VotingId = model.Id, Password = model.Password });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Password", "Неверный пароль");
+                        VotingStatistics newStatistics = new VotingStatistics(foundVoting, db.VotingResults.Count(x => x.VotingId == foundVoting.Id));
+                        newStatistics.Password = model.Password;
+                        return View(newStatistics);
+                    }
+                }
+            }
+            else
+            {
+                return RedirectToAction("VotingNotFound", "Error");
+            }
+        }
+
         public IActionResult Take(int VotingId, string Password)
         {
             if (signInManager.IsSignedIn(User))
@@ -77,28 +131,35 @@ namespace WebSurvey.Controllers
                 Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == VotingId);
                 if (foundVoting != null)
                 {
-                    if (!foundVoting.IsClosed)
+                    if (db.VotingResults.Count(x => x.VotingId == foundVoting.Id && x.UserId.Equals(userManager.GetUserId(User))) == 0)
                     {
-                        if (!foundVoting.IsPassworded || foundVoting.Password.Equals(Password))
+                        if (!foundVoting.IsClosed)
                         {
-                            IEnumerable<VotingOption> foundOptions = db.VotingOptions.Where(x => x.VotingId == foundVoting.Id);
-                            if (foundOptions.Count() > 1)
+                            if (!foundVoting.IsPassworded || foundVoting.Password.Equals(Password))
                             {
-                                return View(new VotingResult(foundVoting, foundOptions.ToList()));
+                                IEnumerable<VotingOption> foundOptions = db.VotingOptions.Where(x => x.VotingId == foundVoting.Id);
+                                if (foundOptions.Count() > 1)
+                                {
+                                    return View(new VotingResult(foundVoting, foundOptions.ToList()));
+                                }
+                                else
+                                {
+                                    return RedirectToAction(controllerName: "Error", actionName: "CorruptVoting");
+                                }
                             }
                             else
                             {
-                                return RedirectToAction(controllerName: "Error", actionName: "CorruptVoting");
+                                return RedirectToAction(controllerName: "Error", actionName: "WrongPassword");
                             }
                         }
                         else
                         {
-                            return RedirectToAction(controllerName: "Error", actionName: "WrongPassword");
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingClosed");
                         }
                     }
                     else
                     {
-                        return RedirectToAction(controllerName: "Error", actionName: "VotingClosed");
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingUsed");
                     }
                 }
                 else
@@ -118,11 +179,18 @@ namespace WebSurvey.Controllers
         {
             if (signInManager.IsSignedIn(User))
             {
-                result.CreatedDate = DateTime.Now;
-                result.UserId = userManager.GetUserId(User);
-                await db.VotingResults.AddAsync(result);
-                await db.SaveChangesAsync();
-                return RedirectToAction(controllerName: "Home", actionName: "Index");
+                if (db.VotingResults.Count(x => x.VotingId == result.VotingId && x.UserId.Equals(userManager.GetUserId(User))) == 0)
+                {
+                    result.CreatedDate = DateTime.Now;
+                    result.UserId = userManager.GetUserId(User);
+                    await db.VotingResults.AddAsync(result);
+                    await db.SaveChangesAsync();
+                    return RedirectToAction(controllerName: "Home", actionName: "Index");
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingUsed");
+                }
             }
             else
             {
