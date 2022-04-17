@@ -17,6 +17,8 @@ namespace WebSurvey.Controllers
             this.userManager = userManager;
         }
 
+
+        #region Create
         public IActionResult Create()
         {
             if (signInManager.IsSignedIn(User))
@@ -60,7 +62,9 @@ namespace WebSurvey.Controllers
                 return View(model);
             }
         }
+        #endregion
 
+        #region Status
         public IActionResult Status(int Id)
         {
             if (signInManager.IsSignedIn(User))
@@ -133,7 +137,9 @@ namespace WebSurvey.Controllers
                 return RedirectToAction("VotingNotFound", "Error");
             }
         }
+        #endregion
 
+        #region Take
         public IActionResult Take(int VotingId, string Password)
         {
             if (signInManager.IsSignedIn(User))
@@ -207,7 +213,9 @@ namespace WebSurvey.Controllers
                 return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
+        #endregion
 
+        #region
         public IActionResult Select()
         {
             return View();
@@ -234,13 +242,32 @@ namespace WebSurvey.Controllers
                 return View(model);
             }
         }
+        #endregion
 
         public IActionResult MyVotings()
         {
             if (signInManager.IsSignedIn(User))
             {
-                IEnumerable <Voting> userVotings = db.Votings.Where(x => x.AuthorId.Equals(userManager.GetUserId(User)));
-                return View(userVotings);
+                List<Voting> userVotings = db.Votings.Where(x => x.AuthorId.Equals(userManager.GetUserId(User))).ToList();
+                List<VotingStatistics> userVoteAndStats = new List<VotingStatistics>();
+                foreach (Voting voting in userVotings)
+                {
+                    userVoteAndStats.Add(new VotingStatistics(voting, db.VotingResults.Count(x => x.VotingId == voting.Id), db.VotingOptions.Count(x => x.VotingId == voting.Id)));
+                }
+                return View(userVoteAndStats);
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        public IActionResult List()
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                IEnumerable<Voting> publicVotings = db.Votings.Where(x => !x.IsPassworded && !x.IsClosed);
+                return View(publicVotings);
             }
             else
             {

@@ -22,17 +22,19 @@
 </script>
 
 <h1 class="text-center">Информация о голосовании #@Model.Id</h1>
-<p>Название: <b>@Model.Name</b></p>
-<p>Описание: <b>@Model.Description</b></p>
-@if (Model.IsPassworded)
-{
-    <p>Тип опроса: <b>Запароленный</b></p>
-}
-else
-{
-    <p>Тип опроса: <b>Публичный</b></p>
-}
-<p>Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b></p>
+<span style="white-space: pre-line">
+    Название: <b>@Model.Name</b>
+    Описание: <b>@Model.Description</b>
+    @if (Model.IsPassworded)
+    {
+        <span>Тип опроса: <b>Запароленный</b></span>
+    }
+    else
+    {
+        <span>Тип опроса: <b>Публичный</b></span>
+    }
+    Был пройден пользователями платформы <b>@Model.TakenCount @WordHelp.Inflect(Model.TakenCount,"раз","раз","раза")</b>
+</span>
 <hr />
 @if (Model.IsPassworded)
 {
@@ -45,10 +47,10 @@ else
                     </div>
                     <input asp-for="Password" type="password" id="password" class="form-control" aria-label="Default">
                     <div class="input-group-prepend">
-                        <a onmouseover="TogglePassword()" onmouseout="TogglePassword()" class="btn btn-outline-secondary">👁️</a>
+                        <a onmouseover="TogglePassword()" onmouseout="TogglePassword()" class="btn btn-outline-secondary"><i class="bi bi-eye-fill"></i></a>
                     </div>
                     <div class="input-group-prepend">
-                        <button type="submit" class="btn btn-outline-secondary">Проголосовать</button>
+                        <button type="submit" class="btn btn-outline-secondary"><i class="bi bi-check2"></i> Проголосовать</button>
                     </div>
                 </div>
             </div>
@@ -58,5 +60,5 @@ else
 }
 else
 {
-    <a asp-controller="Voting" asp-action="Take" asp-route-VotingId="@Model.Id" class="btn btn-outline-primary">Проголосовать</a>
+    <a asp-controller="Voting" asp-action="Take" asp-route-VotingId="@Model.Id" class="btn btn-outline-primary"><i class="bi bi-check2"></i> Проголосовать</a>
 }

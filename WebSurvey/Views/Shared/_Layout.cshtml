@@ -26,7 +26,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Опросы</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" asp-controller="Survey" asp-action="Create">Создать</a>
+                                <a class="dropdown-item" asp-controller="Survey" asp-action="Create"><i class="bi bi-plus-circle"></i> Создать</a>
                                 <a class="dropdown-item" asp-controller="Survey" asp-action="Edit">Редактировать</a>
                                 <a class="dropdown-item" asp-controller="Survey" asp-action="Select">Пройти</a>
                                 <a class="dropdown-item" asp-controller="Survey" asp-action="Results">Получить результаты</a>
@@ -35,7 +35,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Тесты</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" asp-controller="Test" asp-action="Create">Создать</a>
+                                <a class="dropdown-item" asp-controller="Test" asp-action="Create"><i class="bi bi-plus-circle"></i> Создать</a>
                                 <a class="dropdown-item" asp-controller="Test" asp-action="Edit">Редактировать</a>
                                 <a class="dropdown-item" asp-controller="Test" asp-action="Select">Пройти</a>
                                 <a class="dropdown-item" asp-controller="Test" asp-action="Results">Получить результаты</a>
@@ -44,10 +44,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Голосования</a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" asp-controller="Voting" asp-action="Create">Создать</a>
-                                <a class="dropdown-item" asp-controller="Voting" asp-action="MyVotings">Мои голосования</a>
-                                <a class="dropdown-item" asp-controller="Voting" asp-action="Select">Пройти</a>
-                                <a class="dropdown-item" asp-controller="Voting" asp-action="Results">Получить результаты</a>
+                                <a class="dropdown-item" asp-controller="Voting" asp-action="Create"><i class="bi bi-plus-circle"></i> Создать</a>
+                                <a class="dropdown-item" asp-controller="Voting" asp-action="MyVotings"><i class="bi bi-list"></i> Мои голосования</a>
+                                <a class="dropdown-item" asp-controller="Voting" asp-action="Select"><i class="bi bi-check2"></i> Голосовать</a>
                             </div>
                         </li>
                         <li class="nav-item">

@@ -17,7 +17,7 @@ namespace WebSurvey.Models.Voting
         public string AuthorId { get; set; }
         public DateTime CreatedTime { get; set; }
         public bool IsClosed { get; set; }
-        [Display(Name = "Закрытый")]
+        [Display(Name = "Защитить паролем")]
         public bool IsPassworded { get; set; }
         [Display(Name = "Пароль")]
         [DataType(DataType.Password)]
