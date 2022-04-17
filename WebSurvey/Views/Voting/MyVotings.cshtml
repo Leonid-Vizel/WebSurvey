@@ -4,3 +4,9 @@
     ViewData["Title"] = "Мои голосования";
 }
 
+<h2>@ViewData["Title"]</h2>
+
+@foreach(Voting voting in Model)
+{
+    <h5>@voting.Name</h5>
+}
