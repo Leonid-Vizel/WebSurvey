@@ -1,0 +1,68 @@
+﻿@using WebSurvey.Models.Voting
+@model Voting
+@{
+    ViewData["Title"] = "Редактирование голосования";
+}
+
+<script>
+    function OnPasswordNeeded()
+    {
+        var hidingBlock = document.getElementById('hidingBlock');
+        if (document.getElementById('checkHidingBlock').checked)
+        {
+            hidingBlock.removeAttribute('hidden');
+        }
+        else
+        {
+            hidingBlock.setAttribute('hidden','hidden');
+        }
+    }
+</script>
+
+<h2>@ViewData["Title"]</h2>
+<hr>
+<form method="post">
+    <div class="container">
+        <div class="row">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <label asp-for="Description"></label>
+            @Html.TextAreaFor(x=>x.Description)
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+    </div>
+    <hr />
+    <h2>Настройки</h2>
+
+    <div class="form-check">
+        <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
+        <label asp-for="IsPassworded" class="form-check-label"></label>
+    </div>
+    @if (Model.IsPassworded)
+    {
+        <div id="hidingBlock">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+    }
+    else
+    {
+        <div id="hidingBlock" hidden="hidden">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password"></span>
+        </div>
+    }
+    <button class="btn btn-outline-primary" type="submit"><i class="bi bi-send-fill"></i> Подтвердить</button>
+</form>
+
+@section Scripts
+{
+<partial name="_ValidationScriptsPartial" />
+}

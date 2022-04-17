@@ -4,9 +4,11 @@
 }
 
 <h2>Закрытие голосования #@Model</h2>
-<div class="container justify-content-center">
-    <form method="post">
-    <a class="btn btn-outline-primary" asp-controller="Voting" asp-action="MyVotings">Назад</a>
-        <button class="btn btn-outline-danger" type="submit">Удалить</button>
-    </form>
+<div class="container">
+    <div class="justify-content-center">
+        <form method="post">
+            <a class="btn btn-outline-primary" asp-controller="Voting" asp-action="MyVotings"> <i class="bi bi-arrow-return-left"></i> Назад</a>
+            <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i> Удалить</button>
+        </form>
+    </div>
 </div>

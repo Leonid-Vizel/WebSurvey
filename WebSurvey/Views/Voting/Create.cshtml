@@ -101,7 +101,7 @@
     <div id="hidingBlock" hidden="hidden">
         <label asp-for="Password"></label>
         <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password"></span>
+        <span asp-validation-for="Password" class="text-danger"></span>
     </div>
     <hr />
     <div class="text-danger">
@@ -123,7 +123,7 @@
         }
     }
     <a class="btn btn-outline-info" id="addOptionBtn" onclick="AddOption()"><i class="bi bi-plus-circle"></i>Добавить опцию</a>
-    <button type="submit" class="btn btn-outline-primary">Создать</button>
+    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send-fill"></i> Создать</button>
 </form>
 
 

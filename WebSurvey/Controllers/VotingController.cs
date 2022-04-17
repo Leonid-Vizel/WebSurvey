@@ -39,6 +39,11 @@ namespace WebSurvey.Controllers
             {
                 if (ModelState.IsValid)
                 {
+                    if (model.IsPassworded && model.Password == null)
+                    {
+                        ModelState.AddModelError("Password", "Укажите пароль");
+                        return View(model);
+                    }
                     model.CreatedTime = DateTime.Now;
                     model.AuthorId = userManager.GetUserId(User);
                     await db.Votings.AddAsync(model);
@@ -455,6 +460,89 @@ namespace WebSurvey.Controllers
             else
             {
                 return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+        #endregion 
+
+        #region Edit
+        public IActionResult Edit(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        return View(foundVoting);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Voting editedVoting)
+        {
+            if (ModelState.IsValid)
+            {
+                if (signInManager.IsSignedIn(User))
+                {
+                    Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == editedVoting.Id);
+                    if (foundVoting != null)
+                    {
+                        if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            if (editedVoting.IsPassworded && editedVoting.Password == null)
+                            {
+                                ModelState.AddModelError("Password", "Укажите пароль");
+                                return View(editedVoting);
+                            }
+                            foundVoting.Name = editedVoting.Name;
+                            foundVoting.Description = editedVoting.Description;
+                            foundVoting.IsPassworded = editedVoting.IsPassworded;
+                            if (!foundVoting.IsPassworded)
+                            {
+                                foundVoting.Password = null;
+                            }
+                            else
+                            {
+                                foundVoting.Password = editedVoting.Password;
+                            }
+                            db.Votings.Update(foundVoting);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MyVotings");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+                }
+            }
+            else
+            {
+                return View(editedVoting);
             }
         }
         #endregion 
