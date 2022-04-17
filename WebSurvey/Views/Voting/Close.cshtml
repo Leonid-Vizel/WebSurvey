@@ -1,0 +1,12 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Закрытие голосования";
+}
+
+<h2>Закрытие голосования #@Model</h2>
+<div class="container justify-content-center">
+    <form method="post">
+    <a class="btn btn-outline-primary" asp-controller="Voting" asp-action="MyVotings">Назад</a>
+        <button class="btn btn-outline-danger" type="submit">Закрыть</button>
+    </form>
+</div>

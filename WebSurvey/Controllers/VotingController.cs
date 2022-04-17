@@ -215,7 +215,7 @@ namespace WebSurvey.Controllers
         }
         #endregion
 
-        #region
+        #region Select
         public IActionResult Select()
         {
             return View();
@@ -242,7 +242,222 @@ namespace WebSurvey.Controllers
                 return View(model);
             }
         }
-        #endregion
+        #endregion 
+
+        #region Close
+        public IActionResult Close(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (!foundVoting.IsClosed)
+                    {
+                        if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            return View(Id);
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Close")]
+        public async Task<IActionResult> ClosePost(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (!foundVoting.IsClosed)
+                    {
+                        if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            foundVoting.IsClosed = true;
+                            db.Votings.Update(foundVoting);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MyVotings");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+        #endregion 
+
+        #region Open
+        public IActionResult Open(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.IsClosed)
+                    {
+                        if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            return View(Id);
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Open")]
+        public async Task<IActionResult> OpenPost(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.IsClosed)
+                    {
+                        if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            foundVoting.IsClosed = false;
+                            db.Votings.Update(foundVoting);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MyVotings");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+        #endregion 
+
+        #region Delete
+        public IActionResult Delete(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        return View(Id);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Delete")]
+        public async Task<IActionResult> DeletePost(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        db.VotingOptions.RemoveRange(db.VotingOptions.Where(x => x.VotingId == Id));
+                        db.VotingResults.RemoveRange(db.VotingResults.Where(x => x.VotingId == Id));
+                        db.Votings.RemoveRange(foundVoting);
+                        await db.SaveChangesAsync();
+                        return RedirectToAction("MyVotings");
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+        #endregion 
 
         public IActionResult MyVotings()
         {
