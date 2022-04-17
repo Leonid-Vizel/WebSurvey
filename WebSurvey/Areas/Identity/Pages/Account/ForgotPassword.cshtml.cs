@@ -4,6 +4,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -75,6 +76,7 @@ namespace WebSurvey.Areas.Identity.Pages.Account
                     Input.Email,
                     "Восстановление пароля",
                     $"Пожалуйста, пройдите по <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>этой</a> сслыке для восстановления вашего пароля.");
+                Debug.WriteLine(HtmlEncoder.Default.Encode(callbackUrl));
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

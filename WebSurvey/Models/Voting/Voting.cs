@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebSurvey.Models.Voting
 {
@@ -12,7 +13,8 @@ namespace WebSurvey.Models.Voting
         [Required(ErrorMessage = "Укажите описание голосования")]
         [Display(Name = "Описание")]
         public string Description { get; set; }
-        [Required]
+        [ValidateNever]
+        public string AuthorId { get; set; }
         public DateTime CreatedTime { get; set; }
         public bool IsClosed { get; set; }
         [Display(Name = "Закрытый")]

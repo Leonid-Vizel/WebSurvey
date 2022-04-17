@@ -37,7 +37,6 @@
         var elementAfter = document.getElementById('addOptionBtn');
         div.innerHTML = document.getElementById('OptionBlock').innerHTML.replace(/{Number}/g, currentCount);
         elementAfter.insertAdjacentElement('beforebegin', div);
-        
         $("input[id='Options[" + currentCount + "].Text']").rules('remove', 'required');
         div.scrollIntoView();
     }

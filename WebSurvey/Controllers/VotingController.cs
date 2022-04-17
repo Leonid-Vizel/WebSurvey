@@ -33,20 +33,30 @@ namespace WebSurvey.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(VotingCreateModel model)
         {
-            if (ModelState.IsValid)
+            if (signInManager.IsSignedIn(User))
             {
-                await db.Votings.AddAsync(model);
-                await db.SaveChangesAsync();
-                foreach (VotingOption option in model.Options)
+                if (ModelState.IsValid)
                 {
-                    option.VotingId = model.Id;
-                    await db.VotingOptions.AddAsync(option);
+                    model.CreatedTime = DateTime.Now;
+                    model.AuthorId = userManager.GetUserId(User);
+                    await db.Votings.AddAsync(model);
+                    await db.SaveChangesAsync();
+                    foreach (VotingOption option in model.Options)
+                    {
+                        option.VotingId = model.Id;
+                        await db.VotingOptions.AddAsync(option);
+                    }
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Status", new { Id = model.Id });
                 }
-                await db.SaveChangesAsync();
-                return RedirectToAction("Status", new { Id = model.Id });
+                else
+                {
+                    return View(model);
+                }
             }
             else
             {
+                ModelState.AddModelError("Options", "Авторизуйтесь для создания голосований");
                 return View(model);
             }
         }
@@ -222,6 +232,19 @@ namespace WebSurvey.Controllers
             else
             {
                 return View(model);
+            }
+        }
+
+        public IActionResult MyVotings()
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                IEnumerable <Voting> userVotings = db.Votings.Where(x => x.AuthorId.Equals(userManager.GetUserId(User)));
+                return View(userVotings);
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
     }
