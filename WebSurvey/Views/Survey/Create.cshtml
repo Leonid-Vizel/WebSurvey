@@ -4,7 +4,7 @@
     ViewData["Title"] = "Создание опроса";
 }
 
-<body onload="RenameAllQuestions()">
+<body onload="OnStart()">
     <script id="QuestionBlock" type="text/html">
         <div class = "row">
             <div class = "col-11">
@@ -42,6 +42,11 @@
 
     <script>
         let questionCount = 0;
+
+        function OnStart()
+        {
+            questionCount = document.getElementsByName('questionContainer').length;
+        }
 
         function OnPasswordNeeded()
         {
@@ -251,11 +256,70 @@
             <span asp-validation-for="Password"></span>
         </div>
         <hr />
-        @if (Model != null && Model.Questions != null)
+        <div class="text-danger">
+            <span asp-validation-for="Questions"></span>
+        </div>
+        @*@if (Model?.Questions != null)
         {
-            
-        }
+            @for (int i = 0; i < Model.Questions.Length; i++)
+            {
+                <div class="row">
+                    <div class="col-11">
+                        <h5 id="questionHeader-@i">Вопрос #@i</h5>
+                    </div>
+                    <div class="col-1 text-end">
+                        <a class="btn btn-outline-danger" id='btn-delete-@i' onclick="DeleteAndCheckQuestion(@i)"><i class="bi bi-x-circle-fill"></i></a>
+                    </div>
+                </div>
+
+                <div class="input-group mb-3">
+                    <input asp-for="Questions[i].Name" class="form-control" placeholder="Название" />
+                    <div class="input-group-append">
+                        <select class="form-select" asp-for="Questions[i].Type" onchange="OnSelectAnswer(@i)">
+                            @switch (Model.Questions[i].Type)
+                            {
+                                case WebSurvey.Models.Database.QuestionType.Text:
+                                    <option value="0" selected>Текст</option>
+                                    <option value="1">Флажки</option>
+                                    <option value="2">Радио-кнопки</option>
+                                    break;
+                                case WebSurvey.Models.Database.QuestionType.Check:
+                                    <option value="0">Текст</option>
+                                    <option value="1" selected>Флажки</option>
+                                    <option value="2">Радио-кнопки</option>
+                                    break;
+                                case WebSurvey.Models.Database.QuestionType.Radio:
+                                    <option value="0">Текст</option>
+                                    <option value="1">Флажки</option>
+                                    <option value="2" selected>Радио-кнопки</option>
+                                    break;
+                            }
+                        </select>
+                    </div>
+                </div>
+                @if (Model.Questions[i].Type != WebSurvey.Models.Database.QuestionType.Text && Model.Questions[i].Options != null)
+                {
+                    for (int j = 0; j < Model.Questions[i].Options.Length; j++)
+                    {
+                        <div>
+                            
+                        </div>
+                        <div class="input-group mb-3" style="margin-left:20px;">
+                            <input asp-for="Questions[i].Options[j].Text" class="form-control" placeholder="Название опции"/>
+                            <div class="input-group-append">
+                                <a class="btn btn-outline-danger" id="delete-question-@i-option-@j" onclick='DeleteAndCheckOption(@i,@j)'><i class="bi bi-x-circle-fill"></i></a>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        }*@
         <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
         <button type="submit" class="btn btn-outline-primary">Создать</button>
     </form>
 </body>
+
+@section Scripts
+{
+<partial name="_ValidationScriptsPartial" />
+}
