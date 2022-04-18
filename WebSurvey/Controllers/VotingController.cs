@@ -17,7 +17,6 @@ namespace WebSurvey.Controllers
             this.userManager = userManager;
         }
 
-
         #region Create
         public IActionResult Create()
         {
@@ -42,6 +41,12 @@ namespace WebSurvey.Controllers
                     if (model.IsPassworded && model.Password == null)
                     {
                         ModelState.AddModelError("Password", "Укажите пароль");
+                        return View(model);
+                    }
+
+                    if (model.Options.Select(x=>x.Text).Distinct().Count() != model.Options.Count)
+                    {
+                        ModelState.AddModelError("Options", "Названия опций не могут повторятся");
                         return View(model);
                     }
                     model.CreatedTime = DateTime.Now;
@@ -546,6 +551,37 @@ namespace WebSurvey.Controllers
             }
         }
         #endregion 
+
+        public IActionResult Statistics(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        VotingStatistics votingStats = new VotingStatistics(
+                            foundVoting, 
+                            db.VotingResults.Where(x=>x.VotingId == foundVoting.Id).ToArray(),
+                            db.VotingOptions.Where(x=>x.VotingId == foundVoting.Id));
+                        return View(votingStats);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
 
         public IActionResult MyVotings()
         {

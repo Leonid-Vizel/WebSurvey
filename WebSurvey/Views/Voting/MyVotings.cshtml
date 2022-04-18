@@ -28,7 +28,6 @@
                 </div>
             </div>
             <div class="text-end">
-                <a class="btn btn-outline-primary" asp-controller = "Voting" asp-action = "Results" asp-route-Id = "@votingStat.Id"><i class="bi bi-list-check"></i> Результаты</a>
                 <a class="btn btn-outline-info" asp-controller = "Voting" asp-action = "Statistics" asp-route-Id = "@votingStat.Id"><i class="bi bi-graph-up"></i> Статистика</a>
                 <a class="btn btn-outline-warning" asp-controller = "Voting" asp-action = "Edit" asp-route-Id = "@votingStat.Id"><i class="bi bi-pencil"></i> Редактировать</a>
                 @if (votingStat.IsClosed)

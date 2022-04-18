@@ -1,0 +1,16 @@
+﻿@using WebSurvey.Models.Voting
+@model VotingStatistics
+@{
+    ViewData["Title"] = "Статистика голосования";
+    int counter = 0;
+}
+
+@foreach (KeyValuePair<string, double> pair in Model.ResultPercents)
+{
+    <div class="container">
+        <h3>Голоса за '@pair.Key':</h3>
+        <div class="container" style="width:@pair.Value%; height:25px; float: left; background:@VotingStatistics.Colors[counter % VotingStatistics.Colors.Length];"></div>
+        <h6>&nbsp;(@Model.ResultCounts[pair.Key])&nbsp;@pair.Value%</h6>
+    </div>
+    counter++;
+}
