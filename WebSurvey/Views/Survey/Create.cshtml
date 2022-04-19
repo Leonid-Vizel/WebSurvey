@@ -207,6 +207,7 @@
         {
             destroyElement.remove();
         }
+        $("input[id='Questions[" + questionNumber + "].Name']").rules('remove', 'required');
         $('#' + questionNumber).remove();
         var elements = document.getElementsByName('questionContainer');
         for (var i = 0; i < elements.length; i++)
@@ -225,7 +226,7 @@
         var elementAfter = document.getElementById('addQuestionPoint');
         div.innerHTML = document.getElementById('QuestionBlock').innerHTML.replace(/{questionNumber}/g, questionCount);
         elementAfter.insertAdjacentElement('beforebegin', div);
-        $("input[id='Questions[" + currentCount + "].Text']").rules('remove', 'required');
+        $("input[id='Questions[" + questionCount + "].Name']").rules('remove', 'required');
         div.scrollIntoView();
     }
 

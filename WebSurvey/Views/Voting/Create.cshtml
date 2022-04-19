@@ -43,6 +43,7 @@
 
     function DeleteOption(number)
     {
+        $("input[id='Options[" + number + "].Text']").rules('remove', 'required');
         document.getElementById(number).remove();
         RenameAllOptions();
     }
