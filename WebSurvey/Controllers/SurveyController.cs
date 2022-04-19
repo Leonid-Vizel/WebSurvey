@@ -18,6 +18,7 @@ namespace WebSurvey.Controllers
             this.userManager = userManager;
         }
 
+        #region Create
         public IActionResult Create()
         {
             if (signInManager.IsSignedIn(User))
@@ -32,38 +33,77 @@ namespace WebSurvey.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateSurveyModel builtSurvey)
+        public async Task<IActionResult> Create(CreateSurveyModel model)
         {
-            if (signInManager.IsSignedIn(User))
+            if (ModelState.IsValid)
             {
-                if (builtSurvey.Questions.Length > 0)
+                if (model.IsPassworded && model.Password == null)
                 {
-                    if (builtSurvey.Questions.All(x => x.Type == QuestionType.Text || (x.Options != null && x.Options.Count() > 0)))
+                    ModelState.AddModelError("Password", "Укажите пароль");
+                    return View(model);
+                }
+                int errorCount = 0;
+                for (int i = 0; i < model.Questions.Length; i++)
+                {
+                    if (model.Questions[i].Type != QuestionType.Text)
                     {
-                        builtSurvey.AuthorId = userManager.GetUserId(User);
-                        builtSurvey.CreatedDate = DateTime.Now;
-                        builtSurvey.IsClosed = false;
-                        await db.Surveys.AddAsync(builtSurvey);
-                        await db.SaveChangesAsync(); //For Id population
-                        foreach (Models.Survey.SurveyQuestion question in builtSurvey.Questions)
+                        if (model.Questions[i].Options == null || model.Questions[i].Options.Length == 0)
                         {
-                            question.SurveyId = builtSurvey.Id;
+                            ModelState.AddModelError($"Questions[{i}].Name", "У вопроса с флажками или радио-кнопками должна быть как минимум 1 опция");
+                            errorCount++;
                         }
-                        await db.SurveyQuestions.AddRangeAsync(builtSurvey.Questions);
-                        await db.SaveChangesAsync(); //For Id population
-                        foreach (Models.Survey.SurveyQuestion question in builtSurvey.Questions)
+                        else
                         {
-                            if (question.Options != null)
+                            for (int j = 0; j < model.Questions[i].Options.Length; j++)
                             {
-                                foreach (SurveyQuestionOption option in question.Options)
+                                if (model.Questions[i].Options[j].Text == null)
                                 {
-                                    option.QuestionId = question.Id;
+                                    ModelState.AddModelError($"Questions[{i}].Options[{j}].Text", "Укажите опцию или удалите её");
+                                    errorCount++;
                                 }
-                                await db.SurveyQuestionOptions.AddRangeAsync(question.Options);
                             }
                         }
-                        await db.SaveChangesAsync();
-                        return RedirectToAction("Status", new { Id = builtSurvey.Id });
+                    }
+                }
+                if (errorCount > 0)
+                {
+                    return View(model);
+                }
+                if (signInManager.IsSignedIn(User))
+                {
+                    if (model.Questions.Length > 0)
+                    {
+                        if (model.Questions.All(x => x.Type == QuestionType.Text || (x.Options != null && x.Options.Count() > 0)))
+                        {
+                            model.AuthorId = userManager.GetUserId(User);
+                            model.CreatedDate = DateTime.Now;
+                            model.IsClosed = false;
+                            await db.Surveys.AddAsync(model);
+                            await db.SaveChangesAsync(); //For Id population
+                            foreach (SurveyQuestion question in model.Questions)
+                            {
+                                question.SurveyId = model.Id;
+                            }
+                            await db.SurveyQuestions.AddRangeAsync(model.Questions);
+                            await db.SaveChangesAsync(); //For Id population
+                            foreach (SurveyQuestion question in model.Questions)
+                            {
+                                if (question.Options != null)
+                                {
+                                    foreach (SurveyQuestionOption option in question.Options)
+                                    {
+                                        option.QuestionId = question.Id;
+                                    }
+                                    await db.SurveyQuestionOptions.AddRangeAsync(question.Options);
+                                }
+                            }
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("Status", new { Id = model.Id });
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "CorruptSurvey");
+                        }
                     }
                     else
                     {
@@ -72,15 +112,17 @@ namespace WebSurvey.Controllers
                 }
                 else
                 {
-                    return RedirectToAction(controllerName: "Error", actionName: "CorruptSurvey");
+                    return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
                 }
             }
             else
             {
-                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+                return View(model);
             }
         }
+        #endregion
 
+        #region Status
         public IActionResult Status(int Id)
         {
             Survey? foundSurvey = db.Surveys.FirstOrDefault(s => s.Id == Id);
@@ -125,7 +167,9 @@ namespace WebSurvey.Controllers
                 return RedirectToAction("SurveyNotFound", "Error");
             }
         }
+        #endregion
 
+        #region Select
         public IActionResult Select()
         {
             return View();
@@ -152,7 +196,9 @@ namespace WebSurvey.Controllers
                 return View(model);
             }
         }
+        #endregion
 
+        #region Take
         public IActionResult Take(int SurveyId, string Password)
         {
             Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == SurveyId);
@@ -219,7 +265,9 @@ namespace WebSurvey.Controllers
             db.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
+        #endregion
 
+        #region Close
         public IActionResult Close(int Id)
         {
             //Только авторизованный и автор
@@ -244,7 +292,9 @@ namespace WebSurvey.Controllers
                 return RedirectToAction("SurveyNotFound", "Error");
             }
         }
+        #endregion
 
+        #region Delete
         public IActionResult Delete(int Id)
         {
             return View();
@@ -274,7 +324,9 @@ namespace WebSurvey.Controllers
                 return RedirectToAction("SurveyNotFound", "Error");
             }
         }
+        #endregion
 
+        #region Results
         public IActionResult Results(int Id)
         {
             //Только авторизованный и автор
@@ -353,5 +405,6 @@ namespace WebSurvey.Controllers
                 return RedirectToAction("SurveyNotFound", "Error");
             }
         }
+        #endregion
     }
 }

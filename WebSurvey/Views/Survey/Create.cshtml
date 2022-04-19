@@ -4,292 +4,325 @@
     ViewData["Title"] = "Создание опроса";
 }
 
-<body onload="OnStart()">
-    <script id="QuestionBlock" type="text/html">
-        <div class = "row">
-            <div class = "col-11">
-                <h5 id = "questionHeader-{questionNumber}">Вопрос #{questionNumber}</h5>
-            </div>
-            <div class = "col-1 text-end">
-                <a class = "btn btn-outline-danger" id = 'btn-delete-{questionNumber}' onclick = "DeleteAndCheckQuestion({questionNumber})"><i class="bi bi-x-circle-fill"></i></a>
-            </div>
+<script id="QuestionBlock" type="text/html">
+    <div class = "row">
+        <h5 id = "questionHeader-{questionNumber}">Вопрос #{questionNumber}</h5>
+    </div>
+
+    <div class="input-group mb-3">
+        <input id = "Questions[{questionNumber}].Name" name = "Questions[{questionNumber}].Name" class="form-control" placeholder = "Название"/>
+        <div class="input-group-append">
+            <select class="form-select" id = "Questions[{questionNumber}].Type" name = "Questions[{questionNumber}].Type" onchange = "OnSelectAnswer({questionNumber})">
+                <option value="0" selected>Текст</option>
+                <option value="1">Флажки</option>
+                <option value="2">Радио-кнопки</option>
+            </select>
         </div>
-
-        <div class="input-group mb-3">
-            <input id = "Questions[{questionNumber}].Name" name = "Questions[{questionNumber}].Name" class="form-control" placeholder = "Название"/>
-            <div class="input-group-append">
-                <select class="form-select" id = "Questions[{questionNumber}].Type" name = "Questions[{questionNumber}].Type" onchange = "OnSelectAnswer({questionNumber})">
-                    <option value="0" selected>Текст</option>
-                    <option value="1">Флажки</option>
-                    <option value="2">Радио-кнопки</option>
-                </select>
-            </div>
+        <div class="input-group-append">
+            <a class = "btn btn-outline-danger" id = 'btn-delete-{questionNumber}' onclick = "DeleteAndCheckQuestion({questionNumber})"><i class="bi bi-x-circle-fill"></i></a>
         </div>
-    </script>
+    </div>
+</script>
 
-    <script id="OptionBlock" type="text/html">
-        <div class="input-group mb-3" style = "margin-left:20px;">
-            <input id = "Questions[{questionNumber}].Options[{optionNumber}].Text" name = "Questions[{questionNumber}].Options[{optionNumber}].Text" class="form-control" placeholder = "Название опции"/>
-            <div class="input-group-append">
-                <a class = "btn btn-outline-danger" id = "delete-question-{questionNumber}-option-{optionNumber}" onclick = 'DeleteAndCheckOption({questionNumber},{optionNumber})'><i class="bi bi-x-circle-fill"></i></a>
-            </div>
+<script id="OptionBlock" type="text/html">
+    <div class="input-group mb-3" style = "margin-left:20px;">
+        <input id = "Questions[{questionNumber}].Options[{optionNumber}].Text" name = "Questions[{questionNumber}].Options[{optionNumber}].Text" class="form-control" placeholder = "Название опции"/>
+        <div class="input-group-append">
+            <a class = "btn btn-outline-danger" id = "delete-question-{questionNumber}-option-{optionNumber}" onclick = 'DeleteAndCheckOption({questionNumber},{optionNumber})'><i class="bi bi-x-circle-fill"></i></a>
         </div>
-    </script>
+    </div>
+</script>
 
-    <script id="OptionAddBtnBlock" type="text/html">
-        <a class="btn btn-outline-info" id = "addOptionBtn-{questionNumber}" onclick = "AddOption({questionNumber})">Добавить опцию</a>
-    </script>
+<script id="OptionAddBtnBlock" type="text/html">
+    <a class="btn btn-outline-info" id = "addOptionBtn-{questionNumber}" onclick = "AddOption({questionNumber})">Добавить опцию</a>
+</script>
 
-    <script>
-        let questionCount = 0;
-
-        function OnStart()
+<script>
+    function OnPasswordNeeded()
+    {
+        var hidingBlock = document.getElementById('hidingBlock');
+        if (document.getElementById('checkHidingBlock').checked)
         {
-            questionCount = document.getElementsByName('questionContainer').length;
+            hidingBlock.removeAttribute('hidden');
         }
-
-        function OnPasswordNeeded()
+        else
         {
-            var hidingBlock = document.getElementById('hidingBlock');
-            if (document.getElementById('checkHidingBlock').checked)
-            {
-                hidingBlock.removeAttribute('hidden');
-            }
-            else
-            {
-                hidingBlock.setAttribute('hidden','hidden');
-            }
+            hidingBlock.setAttribute('hidden','hidden');
         }
+    }
 
-        function OnSelectAnswer(number)
+    function OnSelectAnswer(number)
+    {
+        var AnswerSelect = document.getElementById('Questions[' + number + '].Type');
+        if (AnswerSelect == null)
         {
-            var AnswerSelect = document.getElementById('Questions[' + number + '].Type');
-                switch(AnswerSelect.options[AnswerSelect.selectedIndex].value) {
-              case '0':  //TEXT
-                //Remove RADIO and CHECK
-                var destroyElement = document.getElementById('addOptionBtn-' + number);
-                if (destroyElement != null)
-                {
-                    destroyElement.remove();
-                }
-                var destroyOptions = document.getElementsByName('optionContainerOf' + number);
-                if (destroyOptions.length > 0)
-                {
-                    if (confirm('При переключении данного вопроса на текст, все опции будут стёрты. Подтвердите действие.'))
-                    {
-                        while (destroyOptions.length > 0)
-                        {
-                            destroyOptions[0].remove();
-                        }
-                    }
-                }
-              break;
-              case '1':
-              case '2':
-                if (document.getElementById('addOptionBtn-' + number) == null)
-                {
-                    var div = document.createElement('div');
-                    div.innerHTML = document.getElementById('OptionAddBtnBlock').innerHTML.replace(/{questionNumber}/g, number);
-                    var insertAfter = document.getElementById(number);
-                    insertAfter.insertAdjacentElement('afterend', div);
-                }
-              break;
-            }
+            AnswerSelect = document.getElementById('Questions_' + number + '__Type');
         }
-
-        function RenameAllQuestions(element, id)
-        {
-            var identificator = element.id;
-            element.setAttribute('id', id);
-            //H5 edititng
-            var element = document.getElementById('questionHeader-' + identificator);
-            element.innerHTML = 'Вопрос #' + id;
-            element.setAttribute('id', 'questionHeader-' + id);
-            //Name Input
-            element = document.getElementById('Questions[' + identificator + '].Name');
-            element.setAttribute('id', 'Questions[' + id + '].Name');
-            element.setAttribute('name', 'Questions[' + id + '].Name');
-            //Type input
-            element = document.getElementById('Questions[' + identificator + '].Type');
-            element.setAttribute('id', 'Questions[' + id + '].Type');
-            element.setAttribute('name', 'Questions[' + id + '].Type');
-            element.setAttribute('onchange', 'OnSelectAnswer(' + id + ')');
-            //'Delete' button
-            element = document.getElementById('btn-delete-' + identificator);
-            element.setAttribute('id', 'btn-delete-' + id);
-            element.setAttribute('onclick', 'DeleteAndCheckQuestion(' + id +')');
-            //'Add Option' button
-            element = document.getElementById('addOptionBtn-' + identificator);
-            if (element != null)
-            {
-                element.setAttribute('id', 'addOptionBtn-' + id);
-                element.setAttribute('onclick', 'AddOption(' + id +')');
-            }
-            //Options
-            containers = document.getElementsByName('optionContainerOf' + identificator);
-            elements = document.querySelectorAll('[id^="Questions[' + identificator + '].Options["]');
-            buttons = document.querySelectorAll('[id^="delete-question-' + identificator + '-option-"]');
-            for (var i = 0; i < elements.length; i++)
-            {
-                elements[i].setAttribute('id', 'Questions[' + id + '].Options[' + i + '].Text');
-                elements[i].setAttribute('name', 'Questions[' + id + '].Options[' + i + '].Text');
-                buttons[i].setAttribute('id', 'delete-question-' + id + '-option-' + i);
-                buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + id + ',' + i + ')');
-                containers[0].setAttribute('id', 'question-' + id + '-option-' + i);
-                containers[0].setAttribute('name', 'optionContainerOf' + id);
-            }
-        }
-
-        function RenameAllOptions(questionNumber)
-        {
-            containers = document.getElementsByName('optionContainerOf' + questionNumber);
-            elements = document.querySelectorAll('[id^="Questions[' + questionNumber + '].Options["]');
-            buttons = document.querySelectorAll('[id^="delete-question-' + questionNumber + '-option-"]');
-            for (var i = 0; i < elements.length; i++)
-            {
-                elements[i].setAttribute('id', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
-                elements[i].setAttribute('name', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
-                buttons[i].setAttribute('id', 'delete-question-' + questionNumber + '-option-' + i);
-                buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + questionNumber + ',' + i + ')');
-                containers[i].setAttribute('id', 'question-' + questionNumber + '-option-' + i);
-            }
-        }
-
-        function DeleteAndCheckOption(questionNumber, optionNumber)
-        {
-           element = document.getElementById('question-'+questionNumber+'-option-'+optionNumber);
-           element.remove();
-           RenameAllOptions(questionNumber);
-        }
-
-        function DeleteAndCheckQuestion(questionNumber)
-        {
-            var destroyOptions = document.getElementsByName('optionContainerOf' + questionNumber);
-            while (destroyOptions.length > 0)
-            {
-                destroyOptions[0].remove();
-            }
-            var destroyElement = document.getElementById('addOptionBtn-' + questionNumber);
+            switch(AnswerSelect.options[AnswerSelect.selectedIndex].value) {
+          case '0':  //TEXT
+            //Remove RADIO and CHECK
+            var destroyElement = document.getElementById('addOptionBtn-' + number);
             if (destroyElement != null)
             {
                 destroyElement.remove();
             }
-            $('#' + questionNumber).remove();
-            var elements = document.getElementsByName('questionContainer');
-            questionCount = elements.length;
-            for (var i = 0; i < elements.length; i++)
+            var destroyOptions = document.getElementsByName('optionContainerOf' + number);
+            if (destroyOptions.length > 0)
             {
-                RenameAllQuestions(elements[i], i);
+                if (confirm('При переключении данного вопроса на текст, все опции будут стёрты. Подтвердите действие.'))
+                {
+                    while (destroyOptions.length > 0)
+                    {
+                        destroyOptions[0].remove();
+                    }
+                }
+            }
+          break;
+          case '1':
+          case '2':
+            if (document.getElementById('addOptionBtn-' + number) == null)
+            {
+                var div = document.createElement('div');
+                div.innerHTML = document.getElementById('OptionAddBtnBlock').innerHTML.replace(/{questionNumber}/g, number);
+                var insertAfter = document.getElementById(number);
+                insertAfter.insertAdjacentElement('afterend', div);
+            }
+          break;
+        }
+    }
+
+    function RenameAllQuestions(element, id)
+    {
+        var identificator = element.id;
+        element.setAttribute('id', id);
+        //H5 edititng
+        var element = document.getElementById('questionHeader-' + identificator);
+        element.innerHTML = 'Вопрос #' + id;
+        element.setAttribute('id', 'questionHeader-' + id);
+        //Name Input
+        element = document.getElementById('Questions[' + identificator + '].Name');
+        if (element != null)
+        {
+            element.setAttribute('id', 'Questions[' + id + '].Name');
+            element.setAttribute('name', 'Questions[' + id + '].Name');
+        }
+        else
+        {
+            element = document.getElementById('Questions_' + identificator + '__Name');
+             element.setAttribute('id', 'Questions[' + id + '].Name');
+            element.setAttribute('name', 'Questions[' + id + '].Name');
+        }
+        //Type input
+        element = document.getElementById('Questions[' + identificator + '].Type');
+        if (element != null)
+        {
+            element.setAttribute('id', 'Questions[' + id + '].Type');
+            element.setAttribute('name', 'Questions[' + id + '].Type');
+        }
+        else
+        {
+            element = document.getElementById('Questions_' + identificator + '__Type');
+            element.setAttribute('id', 'Questions[' + id + '].Type');
+            element.setAttribute('name', 'Questions[' + id + '].Type');
+        }
+        element.setAttribute('onchange', 'OnSelectAnswer(' + id + ')');
+        //'Delete' button
+        element = document.getElementById('btn-delete-' + identificator);
+        element.setAttribute('id', 'btn-delete-' + id);
+        element.setAttribute('onclick', 'DeleteAndCheckQuestion(' + id +')');
+        //Validation If exists
+        element = document.getElementById('validation-' + identificator);
+        if (element != null)
+        {
+            element.setAttribute('id','validation-' + id);
+            element.setAttribute('data-valmsg-for','Questions[' + id + '].Text');
+        }
+        //'Add Option' button
+        element = document.getElementById('addOptionBtn-' + identificator);
+        if (element != null)
+        {
+            element.setAttribute('id', 'addOptionBtn-' + id);
+            element.setAttribute('onclick', 'AddOption(' + id +')');
+        }
+        //Options
+        containers = document.getElementsByName('optionContainerOf' + identificator);
+        elements = document.querySelectorAll('[id^="Questions[' + identificator + '].Options["]');
+        if (elements.length == 0)
+        {
+            elements = document.querySelectorAll('[id^="Questions_' + identificator + '__Options_"]');
+        }
+        buttons = document.querySelectorAll('[id^="delete-question-' + identificator + '-option-"]');
+        for (var i = 0; i < elements.length; i++)
+        {
+            elements[i].setAttribute('id', 'Questions[' + id + '].Options[' + i + '].Text');
+            elements[i].setAttribute('name', 'Questions[' + id + '].Options[' + i + '].Text');
+            buttons[i].setAttribute('id', 'delete-question-' + id + '-option-' + i);
+            buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + id + ',' + i + ')');
+            containers[0].setAttribute('id', 'question-' + id + '-option-' + i);
+            containers[0].setAttribute('name', 'optionContainerOf' + id);
+        }
+    }
+
+    function RenameAllOptions(questionNumber)
+    {
+        containers = document.getElementsByName('optionContainerOf' + questionNumber);
+        elements = document.querySelectorAll('[id^="Questions[' + questionNumber + '].Options["]');
+        if (elements.length == 0)
+        {
+            elements = document.querySelectorAll('[id^="Questions_' + questionNumber + '__Options_"]');
+        }
+        buttons = document.querySelectorAll('[id^="delete-question-' + questionNumber + '-option-"]');
+        validations = document.querySelectorAll('[id^="validation-' + questionNumber + '-"]');
+        for (var i = 0; i < elements.length; i++)
+        {
+            elements[i].setAttribute('id', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
+            elements[i].setAttribute('name', 'Questions[' + questionNumber + '].Options[' + i + '].Text');
+            buttons[i].setAttribute('id', 'delete-question-' + questionNumber + '-option-' + i);
+            buttons[i].setAttribute('onclick', 'DeleteAndCheckOption(' + questionNumber + ',' + i + ')');
+            containers[i].setAttribute('id', 'question-' + questionNumber + '-option-' + i);
+            if (validations[i] != null)
+            {
+                element.setAttribute('id','validation-' + id + '-' + i);
+                element.setAttribute('data-valmsg-for','Questions[' + id + '].Options[' + i + '].Text');
             }
         }
+    }
 
-        function AddQuestion()
+    function DeleteAndCheckOption(questionNumber, optionNumber)
+    {
+       element = document.getElementById('question-'+questionNumber+'-option-'+optionNumber);
+       element.remove();
+       RenameAllOptions(questionNumber);
+    }
+
+    function DeleteAndCheckQuestion(questionNumber)
+    {
+        var destroyOptions = document.getElementsByName('optionContainerOf' + questionNumber);
+        while (destroyOptions.length > 0)
         {
-            var div = document.createElement('div');
-            div.setAttribute('class', 'container mt-3');
-            div.setAttribute('name', 'questionContainer');
-            div.setAttribute('id', questionCount);
-            var elementAfter = document.getElementById('addQuestionBtn');
-            div.innerHTML = document.getElementById('QuestionBlock').innerHTML;
-
-            div.innerHTML = div.innerHTML
-            .replace(/{questionNumber}/g, questionCount);
-            questionCount = questionCount + 1;
-
-            elementAfter.insertAdjacentElement('beforebegin', div);
-            div.scrollIntoView();
-            //ХУЙ
+            destroyOptions[0].remove();
         }
-
-        function AddOption(questionNumber)
+        var destroyElement = document.getElementById('addOptionBtn-' + questionNumber);
+        if (destroyElement != null)
         {
-            var countOfOptions = document.getElementsByName('optionContainerOf' + questionNumber).length;
-            var div = document.createElement('div');
-            div.setAttribute('class', 'container');
-            div.setAttribute('name', 'optionContainerOf' + questionNumber);
-            div.setAttribute('id', 'question-'+questionNumber+'-option-'+countOfOptions);
-            var elementAfter = document.getElementById('addOptionBtn-' + questionNumber);
-            div.innerHTML = document.getElementById('OptionBlock').innerHTML;
-
-            div.innerHTML = div.innerHTML.replace(/{questionNumber}/g, questionNumber);
-            div.innerHTML = div.innerHTML.replace(/{optionNumber}/g, countOfOptions);
-
-            elementAfter.insertAdjacentElement('beforebegin', div);
-            div.scrollIntoView();
+            destroyElement.remove();
         }
-    </script>
+        $('#' + questionNumber).remove();
+        var elements = document.getElementsByName('questionContainer');
+        for (var i = 0; i < elements.length; i++)
+        {
+            RenameAllQuestions(elements[i], i);
+        }
+    }
 
-    <h2>Создание опроса</h2>
+    function AddQuestion()
+    {
+        var questionCount = document.getElementsByName('questionContainer').length;
+        var div = document.createElement('div');
+        div.setAttribute('class', 'container mt-3');
+        div.setAttribute('name', 'questionContainer');
+        div.setAttribute('id', questionCount);
+        var elementAfter = document.getElementById('addQuestionPoint');
+        div.innerHTML = document.getElementById('QuestionBlock').innerHTML.replace(/{questionNumber}/g, questionCount);
+        elementAfter.insertAdjacentElement('beforebegin', div);
+        $("input[id='Questions[" + currentCount + "].Text']").rules('remove', 'required');
+        div.scrollIntoView();
+    }
+
+    function AddOption(questionNumber)
+    {
+        var countOfOptions = document.getElementsByName('optionContainerOf' + questionNumber).length;
+        var div = document.createElement('div');
+        div.setAttribute('class', 'container');
+        div.setAttribute('name', 'optionContainerOf' + questionNumber);
+        div.setAttribute('id', 'question-'+questionNumber+'-option-'+countOfOptions);
+        var elementAfter = document.getElementById('addOptionBtn-' + questionNumber);
+        div.innerHTML = document.getElementById('OptionBlock').innerHTML.replace(/{questionNumber}/g, questionNumber).replace(/{optionNumber}/g, countOfOptions);
+        $("input[id='Questions[" + questionNumber + "].Options[" + countOfOptions + "].Text']").rules('remove', 'required');
+        elementAfter.insertAdjacentElement('beforebegin', div);
+        div.scrollIntoView();
+    }
+</script>
+
+<h2>Создание опроса</h2>
+<hr />
+<form method="post">
+    <div class="container">
+        <div class="row">
+            <label asp-for="Name"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <label asp-for="Description"></label>
+            @Html.TextAreaFor(x=>x.Description)
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+    </div>
     <hr />
-    <form method="post">
-        <div class="container">
-            <div class="row">
-                <label asp-for="Name"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name"></span>
-            </div>
-        </div>
-        <div class="container">
-            <div class="row">
-                <label asp-for="Description"></label>
-                @Html.TextAreaFor(x=>x.Description)
-                <span asp-validation-for="Description"></span>
-            </div>
-        </div>
-        <hr />
-        <h2>Настройки</h2>
+    <h2>Настройки</h2>
 
-        <div class="form-check">
-            <input asp-for="IsAnonimous" class="form-check-input" type="checkbox" id="anonBox" onchange="CheckAnonimOneOff()">
-            <label asp-for="IsAnonimous" class="form-check-label"></label>
+    <div class="form-check">
+        <input asp-for="IsAnonimous" class="form-check-input" type="checkbox" id="anonBox" onchange="CheckAnonimOneOff()">
+        <label asp-for="IsAnonimous" class="form-check-label"></label>
+    </div>
+    <div class="form-check">
+        <input asp-for="IsOneOff" class="form-check-input" type="checkbox" id="oneBox" onchange="CheckAnonimOneOff()">
+        <label asp-for="IsOneOff" class="form-check-label"></label>
+    </div>
+    <div class="form-check">
+        <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
+        <label asp-for="IsPassworded" class="form-check-label"></label>
+    </div>
+    @if (Model != null && Model.IsPassworded)
+    {
+        <div id="hidingBlock">
+            <label asp-for="Password"></label>
+            <input asp-for="Password" class="form-control" />
+            <span asp-validation-for="Password" class="text-danger"></span>
         </div>
-        <div class="form-check">
-            <input asp-for="IsOneOff" class="form-check-input" type="checkbox" id="oneBox" onchange="CheckAnonimOneOff()">
-            <label asp-for="IsOneOff" class="form-check-label"></label>
-        </div>
-        <div class="form-check">
-            <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
-            <label asp-for="IsPassworded" class="form-check-label"></label>
-        </div>
+    }
+    else
+    {
         <div id="hidingBlock" hidden="hidden">
             <label asp-for="Password"></label>
             <input asp-for="Password" class="form-control" />
-            <span asp-validation-for="Password"></span>
+            <span asp-validation-for="Password" class="text-danger"></span>
         </div>
-        <hr />
-        <div class="text-danger">
-            <span asp-validation-for="Questions"></span>
-        </div>
-        @*@if (Model?.Questions != null)
+    }
+    <hr />
+    <div class="text-danger">
+        <span asp-validation-for="Questions"></span>
+    </div>
+    @if (Model?.Questions != null)
+    {
+        for (int i = 0; i < Model.Questions.Length; i++)
         {
-            @for (int i = 0; i < Model.Questions.Length; i++)
-            {
+            <div class="container mt-3" id="@i" name="questionContainer">
                 <div class="row">
-                    <div class="col-11">
-                        <h5 id="questionHeader-@i">Вопрос #@i</h5>
-                    </div>
-                    <div class="col-1 text-end">
-                        <a class="btn btn-outline-danger" id='btn-delete-@i' onclick="DeleteAndCheckQuestion(@i)"><i class="bi bi-x-circle-fill"></i></a>
-                    </div>
+                    <h5 id="questionHeader-@i">Вопрос #@i</h5>
                 </div>
 
+                <span asp-validation-for="Questions[i].Name" id="validation-@i" class="text-danger"></span>
                 <div class="input-group mb-3">
                     <input asp-for="Questions[i].Name" class="form-control" placeholder="Название" />
                     <div class="input-group-append">
-                        <select class="form-select" asp-for="Questions[i].Type" onchange="OnSelectAnswer(@i)">
+                        <select asp-for="Questions[i].Type" class="form-select" onchange="OnSelectAnswer(@i)">
                             @switch (Model.Questions[i].Type)
                             {
-                                case WebSurvey.Models.Database.QuestionType.Text:
+                                case QuestionType.Text:
                                     <option value="0" selected>Текст</option>
                                     <option value="1">Флажки</option>
                                     <option value="2">Радио-кнопки</option>
                                     break;
-                                case WebSurvey.Models.Database.QuestionType.Check:
+                                case QuestionType.Check:
                                     <option value="0">Текст</option>
                                     <option value="1" selected>Флажки</option>
                                     <option value="2">Радио-кнопки</option>
                                     break;
-                                case WebSurvey.Models.Database.QuestionType.Radio:
+                                case QuestionType.Radio:
                                     <option value="0">Текст</option>
                                     <option value="1">Флажки</option>
                                     <option value="2" selected>Радио-кнопки</option>
@@ -297,28 +330,36 @@
                             }
                         </select>
                     </div>
+                    <div class="input-group-append">
+                        <a class="btn btn-outline-danger" id='btn-delete-@i' onclick="DeleteAndCheckQuestion(@i)"><i class="bi bi-x-circle-fill"></i></a>
+                    </div>
                 </div>
-                @if (Model.Questions[i].Type != WebSurvey.Models.Database.QuestionType.Text && Model.Questions[i].Options != null)
-                {
-                    for (int j = 0; j < Model.Questions[i].Options.Length; j++)
+            </div>
+            @if (Model.Questions[i].Type != QuestionType.Text)
+            {
+                <div>
+                    @for (int j = 0; j < Model.Questions[i].Options?.Length; j++)
                     {
-                        <div>
-                            
-                        </div>
-                        <div class="input-group mb-3" style="margin-left:20px;">
-                            <input asp-for="Questions[i].Options[j].Text" class="form-control" placeholder="Название опции"/>
-                            <div class="input-group-append">
-                                <a class="btn btn-outline-danger" id="delete-question-@i-option-@j" onclick='DeleteAndCheckOption(@i,@j)'><i class="bi bi-x-circle-fill"></i></a>
+                        string containerName = $"optionContainerOf{i}";
+                        <div class="container" name="@containerName" id="question-@i-option-@j">
+                            <span asp-validation-for="Questions[i].Options[j].Text" id="validation-@i-@j" class="text-danger"></span>
+                            <div class="input-group mb-3" style="margin-left:20px;">
+                                <input asp-for="Questions[i].Options[j].Text" class="form-control" placeholder="Название опции" />
+                                <div class="input-group-append">
+                                    <a class="btn btn-outline-danger" id="delete-question-@i-option-@j" onclick='DeleteAndCheckOption(@i,@j)'><i class="bi bi-x-circle-fill"></i></a>
+                                </div>
                             </div>
                         </div>
                     }
-                }
+                    <a class="btn btn-outline-info" id="addOptionBtn-@i" onclick="AddOption(@i)">Добавить опцию</a>
+                </div>
             }
-        }*@
-        <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
-        <button type="submit" class="btn btn-outline-primary">Создать</button>
-    </form>
-</body>
+        }
+    }
+    <hr id="addQuestionPoint">
+    <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
+    <button type="submit" class="btn btn-outline-primary">Создать</button>
+</form>
 
 @section Scripts
 {

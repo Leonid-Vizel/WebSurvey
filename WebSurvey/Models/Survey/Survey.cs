@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebSurvey.Models.Survey
 {
@@ -6,16 +7,17 @@ namespace WebSurvey.Models.Survey
     {
         [Key]
         public int Id { get; set; }
-        [Required(ErrorMessage = "Это обязательное поле")]
+        [Required(ErrorMessage = "Укажите название опроса")]
         [MaxLength(150, ErrorMessage = "Слишком длинное название опроса")]
         [MinLength(0)]
         [Display(Name = "Название")]
         public string Name { get; set; }
-        [Required(ErrorMessage = "Это обязательное поле")]
+        [Required(ErrorMessage = "Укажите описание опроса")]
         [MaxLength(500, ErrorMessage = "Слишком длинное описание опроса")]
         [MinLength(0)]
         [Display(Name = "Описание")]
         public string Description { get; set; }
+        [ValidateNever]
         public string AuthorId { get; set; }
         public DateTime CreatedDate { get; set; }
         public bool IsClosed { get; set; }

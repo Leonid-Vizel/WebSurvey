@@ -6,11 +6,9 @@ namespace WebSurvey.Models.Survey
     {
         [Key]
         public int Id { get; set; }
-        [Required]
         public int SurveyId { get; set; }
-        [Required]
+        [Required(ErrorMessage = "Укажите вопрос или удалите его")]
         public string Name { get; set; }
-        [Required]
         public bool IsRequired { get; set; }
         [Required]
         public QuestionType Type { get; set; }

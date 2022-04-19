@@ -1,4 +1,6 @@
-﻿namespace WebSurvey.Models.Survey
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace WebSurvey.Models.Survey
 {
     public class SurveyQuestion : SurveyDbQuestion
     {
@@ -12,7 +14,7 @@
         }
 
         public SurveyQuestion() { }
-
+        [ValidateNever]
         public SurveyQuestionOption[] Options { get; set; }
     }
 }
