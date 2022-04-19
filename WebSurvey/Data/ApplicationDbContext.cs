@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using WebSurvey.Models;
-using WebSurvey.Models.Database;
+using WebSurvey.Models.Survey;
 using WebSurvey.Models.Voting;
 
 namespace WebSurvey.Data
@@ -13,9 +12,9 @@ namespace WebSurvey.Data
 
         #region Surveys
         public DbSet<Survey> Surveys { get; set; }
-        public DbSet<SurveyQuestion> SurveyQuestions { get; set; }
+        public DbSet<SurveyDbQuestion> SurveyQuestions { get; set; }
         public DbSet<SurveyQuestionOption> SurveyQuestionOptions { get; set; }
-        public DbSet<SurveyResult> SurveyResults { get; set; }
+        public DbSet<SurveyDbResult> SurveyResults { get; set; }
         #endregion
         #region Votings
         public DbSet<Voting> Votings { get; set; }

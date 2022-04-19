@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSurvey.Models.ViewModel
+namespace WebSurvey.Models.Survey
 {
-    public class CreateSurveyModel : Database.Survey
+    public class CreateSurveyModel : Survey
     {
         public CreateSurveyModel() { /*Пустой конструктор*/ }
 

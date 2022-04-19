@@ -1,8 +1,8 @@
-﻿namespace WebSurvey.Models.ViewModel
+﻿namespace WebSurvey.Models.Survey
 {
-    public class SurveyStatistics : Database.Survey
+    public class SurveyStatistics : Survey
     {
-        public SurveyStatistics(Database.Survey input, int takenCount)
+        public SurveyStatistics(Survey input, int takenCount)
         {
             Id = input.Id;
             Name = input.Name;

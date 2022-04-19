@@ -1,8 +1,8 @@
-﻿namespace WebSurvey.Models.ViewModel
+﻿namespace WebSurvey.Models.Survey
 {
-    public class SurveyQuestion : Database.SurveyQuestion
+    public class SurveyQuestion : SurveyDbQuestion
     {
-        public SurveyQuestion(Database.SurveyQuestion input, SurveyQuestionOption[] options)
+        public SurveyQuestion(SurveyDbQuestion input, SurveyQuestionOption[] options)
         {
             Id = input.Id;
             SurveyId = input.SurveyId;

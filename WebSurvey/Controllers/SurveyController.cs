@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebSurvey.Data;
-using WebSurvey.Models;
-using WebSurvey.Models.Database;
-using WebSurvey.Models.ViewModel;
+using WebSurvey.Models.Survey;
 
 namespace WebSurvey.Controllers
 {
@@ -47,13 +45,13 @@ namespace WebSurvey.Controllers
                         builtSurvey.IsClosed = false;
                         await db.Surveys.AddAsync(builtSurvey);
                         await db.SaveChangesAsync(); //For Id population
-                        foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
+                        foreach (Models.Survey.SurveyQuestion question in builtSurvey.Questions)
                         {
                             question.SurveyId = builtSurvey.Id;
                         }
                         await db.SurveyQuestions.AddRangeAsync(builtSurvey.Questions);
                         await db.SaveChangesAsync(); //For Id population
-                        foreach (Models.ViewModel.SurveyQuestion question in builtSurvey.Questions)
+                        foreach (Models.Survey.SurveyQuestion question in builtSurvey.Questions)
                         {
                             if (question.Options != null)
                             {
@@ -182,23 +180,23 @@ namespace WebSurvey.Controllers
                 {
                     return RedirectToAction("WrongPassword", "Error");
                 }
-                List<Models.Database.SurveyQuestion> foundQuestions = db.SurveyQuestions.Where(x => x.SurveyId == SurveyId).ToList();
+                List<SurveyDbQuestion> foundQuestions = db.SurveyQuestions.Where(x => x.SurveyId == SurveyId).ToList();
                 if (foundQuestions.Count() > 0)
                 {
-                    List<Models.ViewModel.SurveyQuestion> questionList = new List<Models.ViewModel.SurveyQuestion>(foundQuestions.Count());
-                    foreach (Models.Database.SurveyQuestion question in foundQuestions)
+                    List<SurveyQuestion> questionList = new List<SurveyQuestion>(foundQuestions.Count());
+                    foreach (SurveyDbQuestion question in foundQuestions)
                     {
                         IEnumerable<SurveyQuestionOption> options = db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id);
                         if (question.Type == QuestionType.Text || options.Count() > 0)
                         {
-                            questionList.Add(new Models.ViewModel.SurveyQuestion(question, options.ToArray()));
+                            questionList.Add(new SurveyQuestion(question, options.ToArray()));
                         }
                         else
                         {
                             return RedirectToAction("CorruptSurvey", "Error");
                         }
                     }
-                    Models.ViewModel.SurveyResult emptyResults = new Models.ViewModel.SurveyResult(foundSurvey, questionList);
+                    SurveyResult emptyResults = new SurveyResult(foundSurvey, questionList);
                     return View(emptyResults);
                 }
                 else
@@ -215,9 +213,9 @@ namespace WebSurvey.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Take")]
-        public IActionResult TakePOST(Models.ViewModel.SurveyResult res)
+        public IActionResult TakePOST(SurveyResult result)
         {
-            db.SurveyResults.Add(res.ToDbClass());
+            db.SurveyResults.Add(result.ToDbClass());
             db.SaveChanges();
             return RedirectToAction("Index", "Home");
         }
@@ -261,8 +259,8 @@ namespace WebSurvey.Controllers
             if (foundSurvey != null)
             {
                 db.Surveys.Remove(foundSurvey);
-                Models.Database.SurveyQuestion[] arrayToDelete = db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
-                foreach (Models.Database.SurveyQuestion question in arrayToDelete)
+                SurveyDbQuestion[] arrayToDelete = db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
+                foreach (SurveyDbQuestion question in arrayToDelete)
                 {
                     db.RemoveRange(db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id));
                 }
@@ -291,15 +289,15 @@ namespace WebSurvey.Controllers
             Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
             if (foundSurvey != null)
             {
-                List<Models.ViewModel.SurveyResult> clearResults = new List<Models.ViewModel.SurveyResult>();
-                List<Models.ViewModel.SurveyQuestion> clearSurveyQuestions = new List<Models.ViewModel.SurveyQuestion>();
-                foreach (Models.Database.SurveyQuestion question in db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id))
+                List<SurveyResult> clearResults = new List<SurveyResult>();
+                List<SurveyQuestion> clearSurveyQuestions = new List<SurveyQuestion>();
+                foreach (SurveyDbQuestion question in db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id))
                 {
-                    clearSurveyQuestions.Add(new Models.ViewModel.SurveyQuestion(question, null));
+                    clearSurveyQuestions.Add(new SurveyQuestion(question, null));
                 }
-                foreach (Models.Database.SurveyResult result in db.SurveyResults.Where(x => x.SurveyId == foundSurvey.Id))
+                foreach (SurveyDbResult result in db.SurveyResults.Where(x => x.SurveyId == foundSurvey.Id))
                 {
-                    clearResults.Add(new Models.ViewModel.SurveyResult(result, foundSurvey.Name, clearSurveyQuestions));
+                    clearResults.Add(new SurveyResult(result, foundSurvey.Name, clearSurveyQuestions));
                 }
 
                 using (XLWorkbook workbook = new XLWorkbook())
@@ -313,11 +311,11 @@ namespace WebSurvey.Controllers
                         worksheet.Cell(currentRow, currentCol++).Value = "Никнейм";
                     }
 
-                    foreach (Models.ViewModel.SurveyQuestion questionHeader in clearSurveyQuestions)
+                    foreach (SurveyQuestion questionHeader in clearSurveyQuestions)
                     {
                         worksheet.Cell(currentRow, currentCol++).Value = questionHeader.Name;
                     }
-                    foreach (Models.ViewModel.SurveyResult result in clearResults)
+                    foreach (SurveyResult result in clearResults)
                     {
                         currentCol = 1;
                         worksheet.Cell(++currentRow, currentCol++).Value = result.Id;

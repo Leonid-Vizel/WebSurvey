@@ -267,7 +267,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Surveys");
+                    b.ToTable("Surveys", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.Database.SurveyQuestion", b =>
@@ -293,7 +293,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SurveyQuestions");
+                    b.ToTable("SurveyQuestions", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.Database.SurveyResult", b =>
@@ -319,7 +319,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SurveyResults");
+                    b.ToTable("SurveyResults", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.SurveyQuestionOption", b =>
@@ -339,7 +339,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SurveyQuestionOptions");
+                    b.ToTable("SurveyQuestionOptions", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.Voting.Voting", b =>
@@ -376,7 +376,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Votings");
+                    b.ToTable("Votings", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.Voting.VotingOption", b =>
@@ -396,7 +396,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VotingOptions");
+                    b.ToTable("VotingOptions", (string)null);
                 });
 
             modelBuilder.Entity("WebSurvey.Models.Voting.VotingResult", b =>
@@ -423,7 +423,7 @@ namespace WebSurvey.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("VotingResults");
+                    b.ToTable("VotingResults", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

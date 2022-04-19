@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using WebSurvey.Data;
 using WebSurvey.Models;
+using WebSurvey.Models.Survey;
 
 namespace WebSurvey.Controllers
 {

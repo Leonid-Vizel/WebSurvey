@@ -1,10 +1,10 @@
 ﻿using System.Text.Json;
 
-namespace WebSurvey.Models.ViewModel
+namespace WebSurvey.Models.Survey
 {
-    public class SurveyResult : Database.SurveyResult
+    public class SurveyResult : SurveyDbResult
     {
-        public SurveyResult(Database.SurveyResult input, string name, List<SurveyQuestion> questions)
+        public SurveyResult(SurveyDbResult input, string name, List<SurveyQuestion> questions)
         {
             Questions = questions;
             Id = input.Id;
@@ -16,31 +16,31 @@ namespace WebSurvey.Models.ViewModel
             {
                 stream.Write(input.Data, 0, input.Data.Length);
                 stream.Position = 0;
-                Results = JsonSerializer.Deserialize(stream, typeof(List<Answer>)) as List<Answer>;
+                Results = JsonSerializer.Deserialize(stream, typeof(List<SurveyAnswer>)) as List<SurveyAnswer>;
             }
             if (Results == null)
             {
-                Results = new List<Answer>();
+                Results = new List<SurveyAnswer>();
             }
         }
 
         public SurveyResult() { }
 
-        public SurveyResult(Database.Survey survey, List<SurveyQuestion> questions)
+        public SurveyResult(Survey survey, List<SurveyQuestion> questions)
         {
             SurveyId = survey.Id;
             Name = survey.Name;
-            Results = new List<Answer>();
+            Results = new List<SurveyAnswer>();
             Questions = questions;
             for (int i = 0; i < questions.Count; i++)
             {
-                Results.Add(new Answer());
+                Results.Add(new SurveyAnswer());
             }
         }
 
-        public Database.SurveyResult ToDbClass()
+        public SurveyDbResult ToDbClass()
         {
-            Database.SurveyResult dbResult = new Database.SurveyResult();
+            SurveyDbResult dbResult = new SurveyDbResult();
             dbResult.SurveyId = SurveyId;
             using (MemoryStream memStream = new MemoryStream())
             {
@@ -52,6 +52,6 @@ namespace WebSurvey.Models.ViewModel
 
         public string Name { get; set; }
         public List<SurveyQuestion> Questions { get; set; }
-        public List<Answer> Results { get; set; }
+        public List<SurveyAnswer> Results { get; set; }
     }
 }

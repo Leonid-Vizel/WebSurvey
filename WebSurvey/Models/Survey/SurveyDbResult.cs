@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace WebSurvey.Models.Database
+namespace WebSurvey.Models.Survey
 {
-    public class SurveyResult
+    public class SurveyDbResult
     {
         [Key]
         public int Id { get; set; }
