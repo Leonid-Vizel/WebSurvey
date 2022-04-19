@@ -5,6 +5,8 @@
     int counter = 0;
 }
 
+<h2>Статистика голосования '@Model.Name'</h2>
+<hr>
 @foreach (KeyValuePair<string, double> pair in Model.ResultPercents)
 {
     <div class="container">
@@ -14,3 +16,7 @@
     </div>
     counter++;
 }
+<hr>
+<form method = "post">
+    <button class = "btn btn-outline-success" type = "submit">Получить результаты</button>
+</form>

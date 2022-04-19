@@ -52,5 +52,10 @@ namespace WebSurvey.Controllers
         {
             return View();
         }
+
+        public IActionResult NotEnoughResults()
+        {
+            return View();
+        }
     }
 }

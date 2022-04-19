@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WebSurvey.Data;
 using WebSurvey.Models.Voting;
+using ClosedXML.Excel;
 
 namespace WebSurvey.Controllers
 {
@@ -44,7 +45,7 @@ namespace WebSurvey.Controllers
                         return View(model);
                     }
 
-                    if (model.Options.Select(x=>x.Text).Distinct().Count() != model.Options.Count)
+                    if (model.Options.Select(x => x.Text).Distinct().Count() != model.Options.Count)
                     {
                         ModelState.AddModelError("Options", "Названия опций не могут повторятся");
                         return View(model);
@@ -562,10 +563,69 @@ namespace WebSurvey.Controllers
                     if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
                     {
                         VotingStatistics votingStats = new VotingStatistics(
-                            foundVoting, 
-                            db.VotingResults.Where(x=>x.VotingId == foundVoting.Id).ToArray(),
-                            db.VotingOptions.Where(x=>x.VotingId == foundVoting.Id));
+                            foundVoting,
+                            db.VotingResults.Where(x => x.VotingId == foundVoting.Id).ToArray(),
+                            db.VotingOptions.Where(x => x.VotingId == foundVoting.Id));
                         return View(votingStats);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Statistics")]
+        public IActionResult StatisticsPost(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Voting? foundVoting = db.Votings.FirstOrDefault(x => x.Id == Id);
+                if (foundVoting != null)
+                {
+                    if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        IEnumerable<VotingResult> results = db.VotingResults.Where(x => x.VotingId == Id);
+                        if (results.Count() > 0)
+                        {
+                            using (XLWorkbook workbook = new XLWorkbook())
+                            {
+                                IXLWorksheet worksheet = workbook.Worksheets.Add("Results");
+                                worksheet.Cell(1, 1).Value = "Номер ответа";
+                                worksheet.Cell(1, 2).Value = "Идентификатор пользователя";
+                                worksheet.Cell(1, 3).Value = "Ответ";
+                                int row = 2;
+                                foreach(VotingResult result in results)
+                                {
+                                    worksheet.Cell(row, 1).Value = result.Id;
+                                    worksheet.Cell(row, 2).Value = result.UserId;
+                                    worksheet.Cell(row++, 3).Value = result.Answer;
+                                }
+                                using (MemoryStream memStream = new MemoryStream())
+                                {
+                                    workbook.SaveAs(memStream);
+                                    return File(
+                                        memStream.ToArray(),
+                                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                        $"{foundVoting.Name}.xlsx");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "NotEnoughResults");
+                        }
                     }
                     else
                     {
