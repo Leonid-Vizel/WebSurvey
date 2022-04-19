@@ -4,7 +4,21 @@
     ViewData["Title"] = "Мои голосования";
 }
 
-<h2>@ViewData["Title"]</h2>
+<script>
+    function SetClipboard(content)
+    {
+        navigator.clipboard.writeText(content);
+        document.getElementById('copyIcon').setAttribute('class','bi bi-check2');
+        var interval = setInterval(function(){SetIconBack()},2500);
+    }
+
+    function SetIconBack()
+    {
+        document.getElementById('copyIcon').setAttribute('class','bi bi-clipboard-check');
+    }
+</script>
+
+<h2><i class="bi bi-list-stars"></i> @ViewData["Title"]</h2>
 <hr>
 
 @if (Model.Count() > 0)
@@ -15,7 +29,7 @@
             <h5><a class="link" asp-controller="Voting" asp-action="Status" asp-route-Id="@votingStat.Id">@votingStat.Name</a></h5>
             <div class="row col-12">
                 <div class="col-3">
-                    <h6>Номер: #@votingStat.Id <a class = "btn btn-outline-primary btn-sm" onclick = "CopyClip(@votingStat.Id)"><i class="bi bi-clipboard-check"></i></a></h6>
+                    <h6>Номер: #@votingStat.Id <a class = "btn btn-outline-primary btn-sm" onclick = "SetClipboard(@votingStat.Id)"><i id = "copyIcon" class="bi bi-clipboard-check"></i></a></h6>
                 </div>
                 <div class="col-3">
                     <h6>Создано: @votingStat.CreatedTime.ToString("dd.MM.yyyy")</h6>
