@@ -9,9 +9,13 @@ namespace WebSurvey.Models.Voting
         public int Id { get; set; }
         [Required(ErrorMessage = "Укажите название голосования")]
         [Display(Name = "Название")]
+        [MaxLength(150, ErrorMessage = "Слишком длинное название голосования")]
+        [MinLength(0)]
         public string Name { get; set; }
         [Required(ErrorMessage = "Укажите описание голосования")]
         [Display(Name = "Описание")]
+        [MaxLength(500, ErrorMessage = "Слишком длинное описание голосования")]
+        [MinLength(0)]
         public string Description { get; set; }
         [ValidateNever]
         public string AuthorId { get; set; }
