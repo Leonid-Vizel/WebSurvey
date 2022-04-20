@@ -37,6 +37,11 @@ namespace WebSurvey.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (model.IsAnonimous && model.IsOneOff)
+                {
+                    ModelState.AddModelError("IsOneOff", "Опрос не может одновременно быть одноразовым и анонимным");
+                    return View(model);
+                }
                 if (model.IsPassworded && model.Password == null)
                 {
                     ModelState.AddModelError("Password", "Укажите пароль");
@@ -61,6 +66,15 @@ namespace WebSurvey.Controllers
                                     ModelState.AddModelError($"Questions[{i}].Options[{j}].Text", "Укажите опцию или удалите её");
                                     errorCount++;
                                 }
+                            }
+                            if (errorCount > 0)
+                            {
+                                return View(model);
+                            }
+                            if (model.Questions[i].Options.Select(x => x.Text).Distinct().Count() != model.Questions[i].Options.Length)
+                            {
+                                ModelState.AddModelError($"Questions[{i}].Options", "Названия опций не могут повторятся");
+                                return View(model);
                             }
                         }
                     }

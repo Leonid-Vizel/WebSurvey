@@ -105,9 +105,7 @@
         <span asp-validation-for="Password" class="text-danger"></span>
     </div>
     <hr />
-    <div class="text-danger">
-        <span asp-validation-for="Options"></span>
-    </div>
+    <span asp-validation-for="Options" class="text-danger"></span>
     @if (Model?.Options != null)
     {
         @for (int i = 0; i < Model.Options.Count; i++)

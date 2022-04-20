@@ -182,8 +182,8 @@
             containers[i].setAttribute('id', 'question-' + questionNumber + '-option-' + i);
             if (validations[i] != null)
             {
-                element.setAttribute('id','validation-' + id + '-' + i);
-                element.setAttribute('data-valmsg-for','Questions[' + id + '].Options[' + i + '].Text');
+                validations[i].setAttribute('id','validation-' + questionNumber + '-' + i);
+                validations[i].setAttribute('data-valmsg-for','Questions[' + questionNumber + '].Options[' + i + '].Text');
             }
         }
     }
@@ -191,6 +191,7 @@
     function DeleteAndCheckOption(questionNumber, optionNumber)
     {
        element = document.getElementById('question-'+questionNumber+'-option-'+optionNumber);
+       $("input[id='Questions[" + questionNumber + "].Options[" + optionNumber + "].Text']").rules('remove', 'required');
        element.remove();
        RenameAllOptions(questionNumber);
     }
@@ -198,8 +199,11 @@
     function DeleteAndCheckQuestion(questionNumber)
     {
         var destroyOptions = document.getElementsByName('optionContainerOf' + questionNumber);
+        var count = 0;
         while (destroyOptions.length > 0)
         {
+            $("input[id='Questions[" + questionNumber + "].Options[" + count + "].Text']").rules('remove', 'required');
+            count = count + 1;
             destroyOptions[0].remove();
         }
         var destroyElement = document.getElementById('addOptionBtn-' + questionNumber);
@@ -239,8 +243,8 @@
         div.setAttribute('id', 'question-'+questionNumber+'-option-'+countOfOptions);
         var elementAfter = document.getElementById('addOptionBtn-' + questionNumber);
         div.innerHTML = document.getElementById('OptionBlock').innerHTML.replace(/{questionNumber}/g, questionNumber).replace(/{optionNumber}/g, countOfOptions);
-        $("input[id='Questions[" + questionNumber + "].Options[" + countOfOptions + "].Text']").rules('remove', 'required');
         elementAfter.insertAdjacentElement('beforebegin', div);
+        $("input[id='Questions[" + questionNumber + "].Options[" + countOfOptions + "].Text']").rules('remove', 'required');
         div.scrollIntoView();
     }
 </script>
@@ -272,6 +276,7 @@
     <div class="form-check">
         <input asp-for="IsOneOff" class="form-check-input" type="checkbox" id="oneBox" onchange="CheckAnonimOneOff()">
         <label asp-for="IsOneOff" class="form-check-label"></label>
+        <span asp-validation-for="IsOneOff" class="text-danger"></span>
     </div>
     <div class="form-check">
         <input asp-for="IsPassworded" class="form-check-input" type="checkbox" id="checkHidingBlock" onchange="OnPasswordNeeded()">
@@ -335,6 +340,7 @@
                         <a class="btn btn-outline-danger" id='btn-delete-@i' onclick="DeleteAndCheckQuestion(@i)"><i class="bi bi-x-circle-fill"></i></a>
                     </div>
                 </div>
+                <span asp-validation-for="Questions[i].Options" class="text-danger"></span>
             </div>
             @if (Model.Questions[i].Type != QuestionType.Text)
             {
