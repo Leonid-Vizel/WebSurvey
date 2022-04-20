@@ -206,7 +206,7 @@ namespace WebSurvey.Controllers
         {
             if (signInManager.IsSignedIn(User))
             {
-                if (db.VotingResults.Count(x => x.VotingId == result.VotingId && x.UserId.Equals(userManager.GetUserId(User))) == 0)
+                if (!db.VotingResults.Any(x => x.VotingId == result.VotingId && x.UserId.Equals(userManager.GetUserId(User))))
                 {
                     result.CreatedDate = DateTime.Now;
                     result.UserId = userManager.GetUserId(User);
@@ -449,7 +449,7 @@ namespace WebSurvey.Controllers
                     {
                         db.VotingOptions.RemoveRange(db.VotingOptions.Where(x => x.VotingId == Id));
                         db.VotingResults.RemoveRange(db.VotingResults.Where(x => x.VotingId == Id));
-                        db.Votings.RemoveRange(foundVoting);
+                        db.Votings.Remove(foundVoting);
                         await db.SaveChangesAsync();
                         return RedirectToAction("MyVotings");
                     }

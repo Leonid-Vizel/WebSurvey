@@ -146,7 +146,7 @@ namespace WebSurvey.Controllers
             }
             else
             {
-                return RedirectToAction("SurveyNotFound","Error");
+                return RedirectToAction("SurveyNotFound", "Error");
             }
         }
 
@@ -159,7 +159,7 @@ namespace WebSurvey.Controllers
             {
                 if (foundSurvey.Password == null)
                 {
-                    return RedirectToAction("Take", new { SurveyId = passwordInfo.Id});
+                    return RedirectToAction("Take", new { SurveyId = passwordInfo.Id });
                 }
                 else
                 {
@@ -195,8 +195,14 @@ namespace WebSurvey.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (db.Surveys.Any(x => x.Id == model.Search))
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == model.Search);
+                if (foundSurvey != null)
                 {
+                    if (foundSurvey.IsClosed)
+                    {
+                        ModelState.AddModelError("Search", "Опрос закрыт");
+                        return View(model);
+                    }
                     return RedirectToAction("Status", new { Id = model.Search });
                 }
                 else
@@ -226,9 +232,9 @@ namespace WebSurvey.Controllers
                 {
                     if (signInManager.IsSignedIn(User))
                     {
-                        if (foundSurvey.IsOneOff && !db.SurveyResults.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
+                        if (foundSurvey.IsOneOff && db.SurveyResults.Any(x => x.SurveyId == foundSurvey.Id && x.UserId.Equals(userManager.GetUserId(User))))
                         {
-                            return RedirectToAction("AlreadyUsed", "Error");
+                            return RedirectToAction("SurveyUsed", "Error");
                         }
                     }
                     else
@@ -273,44 +279,216 @@ namespace WebSurvey.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Take")]
-        public IActionResult TakePOST(SurveyResult result)
+        public async Task<IActionResult> TakePost(SurveyResult result)
         {
-            db.SurveyResults.Add(result.ToDbClass());
-            db.SaveChanges();
-            return RedirectToAction("Index", "Home");
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? survey = db.Surveys.FirstOrDefault(x => x.Id == result.SurveyId);
+                if (survey != null)
+                {
+                    if (survey.IsOneOff && db.SurveyResults.Any(x => x.SurveyId == result.SurveyId && x.UserId.Equals(userManager.GetUserId(User))))
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "SurveyUsed");
+                    }
+                    if (survey.IsOneOff || !survey.IsAnonimous)
+                    {
+                        result.UserId = userManager.GetUserId(User);
+                    }
+                    result.DateTaken = DateTime.Now;
+                    await db.SurveyResults.AddAsync(result.ToDbClass());
+                    await db.SaveChangesAsync();
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
         }
         #endregion
 
         #region Close
         public IActionResult Close(int Id)
         {
-            return View();
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (!foundSurvey.IsClosed)
+                    {
+                        if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            return View(Id);
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Close")]
-        public async Task<IActionResult> ClosePOST(int Id)
+        public async Task<IActionResult> ClosePost(int Id)
         {
-            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
-            if (foundSurvey != null)
+            if (signInManager.IsSignedIn(User))
             {
-                foundSurvey.IsClosed = true;
-                await db.Surveys.AddAsync(foundSurvey);
-                await db.SaveChangesAsync();
-                return RedirectToAction(controllerName: "Home", actionName: "Index");
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (!foundSurvey.IsClosed)
+                    {
+                        if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            foundSurvey.IsClosed = true;
+                            db.Surveys.Update(foundSurvey);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MySurveys");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
             }
             else
             {
-                return RedirectToAction("SurveyNotFound", "Error");
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
-        #endregion
+        #endregion 
+
+        #region Open
+        public IActionResult Open(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (foundSurvey.IsClosed)
+                    {
+                        if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            return View(Id);
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Open")]
+        public async Task<IActionResult> OpenPost(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (foundSurvey.IsClosed)
+                    {
+                        if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            foundSurvey.IsClosed = false;
+                            db.Surveys.Update(foundSurvey);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MySurveys");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+        #endregion 
 
         #region Delete
         public IActionResult Delete(int Id)
         {
-            return View();
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        return View(Id);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
         }
 
         [HttpPost]
@@ -318,23 +496,37 @@ namespace WebSurvey.Controllers
         [ActionName("Delete")]
         public async Task<IActionResult> DeletePOST(int Id)
         {
-            Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
-            if (foundSurvey != null)
+            if (signInManager.IsSignedIn(User))
             {
-                db.Surveys.Remove(foundSurvey);
-                SurveyDbQuestion[] arrayToDelete = db.SurveyQuestions.Where(x => x.SurveyId == foundSurvey.Id).ToArray();
-                foreach (SurveyDbQuestion question in arrayToDelete)
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
                 {
-                    db.RemoveRange(db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id));
+                    if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        foreach (SurveyDbQuestion question in db.SurveyQuestions.Where(x => x.SurveyId == Id).ToArray())
+                        {
+                            db.SurveyQuestionOptions.RemoveRange(db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id));
+                            db.SurveyQuestions.Remove(question);
+                        }
+
+                        db.SurveyResults.RemoveRange(db.SurveyResults.Where(x => x.SurveyId == Id));
+                        db.Surveys.Remove(foundSurvey);
+                        await db.SaveChangesAsync();
+                        return RedirectToAction("MySurveys");
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                    }
                 }
-                db.RemoveRange(arrayToDelete);
-                db.RemoveRange(db.SurveyResults.Where(x => x.SurveyId == foundSurvey.Id));
-                await db.SaveChangesAsync();
-                return RedirectToAction(controllerName: "Home", actionName: "Index");
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "VotingNotFound");
+                }
             }
             else
             {
-                return RedirectToAction("SurveyNotFound", "Error");
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
             }
         }
         #endregion
@@ -349,7 +541,7 @@ namespace WebSurvey.Controllers
                 List<SurveyStatistics> userSurveysAndStats = new List<SurveyStatistics>();
                 foreach (Survey survey in userSurveys)
                 {
-                    userSurveysAndStats.Add(new SurveyStatistics(survey, db.SurveyResults.Count(x=>x.SurveyId == survey.Id), db.SurveyQuestions.Count(x=>x.SurveyId == survey.Id)));
+                    userSurveysAndStats.Add(new SurveyStatistics(survey, db.SurveyResults.Count(x => x.SurveyId == survey.Id), db.SurveyQuestions.Count(x => x.SurveyId == survey.Id)));
                 }
                 return View(userSurveysAndStats);
             }
@@ -421,7 +613,7 @@ namespace WebSurvey.Controllers
                         return File(
                             content,
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                            "users.xlsx");
+                            $"{foundSurvey.Name}.xlsx");
                     }
                 }
             }
@@ -431,5 +623,11 @@ namespace WebSurvey.Controllers
             }
         }
         #endregion
+
+        public IActionResult List()
+        {
+            IEnumerable<Survey> publicSurveys = db.Surveys.Where(x => !x.IsPassworded && !x.IsClosed);
+            return View(publicSurveys);
+        }
     }
 }

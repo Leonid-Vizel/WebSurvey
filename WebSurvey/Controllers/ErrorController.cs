@@ -43,7 +43,7 @@ namespace WebSurvey.Controllers
             return View();
         }
 
-        public IActionResult AlreadyUsed()
+        public IActionResult SurveyUsed()
         {
             return View();
         }

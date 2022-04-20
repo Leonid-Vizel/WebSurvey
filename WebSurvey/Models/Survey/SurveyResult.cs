@@ -42,6 +42,9 @@ namespace WebSurvey.Models.Survey
         {
             SurveyDbResult dbResult = new SurveyDbResult();
             dbResult.SurveyId = SurveyId;
+            dbResult.UserId = UserId;
+            dbResult.DateTaken = DateTaken;
+
             using (MemoryStream memStream = new MemoryStream())
             {
                 JsonSerializer.Serialize(memStream, Results);

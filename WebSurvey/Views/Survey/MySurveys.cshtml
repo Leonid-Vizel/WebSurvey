@@ -43,7 +43,7 @@
             </div>
             <div class="text-end">
                 <form method= "post" asp-route-Id = "@surveyStat.Id">
-                <button class = "btn btn-outline-info" type = "submit"><i class="bi bi-graph-up"></i> Результаты</button>
+                <button class = "btn btn-outline-success" type = "submit"><i class="bi bi-file-earmark-text"></i> Результаты</button>
                 <a class="btn btn-outline-warning" asp-controller = "Survey" asp-action = "Edit" asp-route-Id = "@surveyStat.Id"><i class="bi bi-pencil"></i> Редактировать</a>
                 @if (surveyStat.IsClosed)
                 {
