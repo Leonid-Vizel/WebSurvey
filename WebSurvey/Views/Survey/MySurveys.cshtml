@@ -1,0 +1,66 @@
+﻿@using WebSurvey.Models.Survey
+@model IEnumerable<SurveyStatistics>
+@{
+    ViewData["Title"] = "Мои опросы";
+}
+
+<script>
+    function SetClipboard(content)
+    {
+        navigator.clipboard.writeText(content);
+        document.getElementById('copyIcon').setAttribute('class','bi bi-check2');
+        var interval = setInterval(function(){SetIconBack()},2500);
+    }
+
+    function SetIconBack()
+    {
+        document.getElementById('copyIcon').setAttribute('class','bi bi-clipboard-check');
+    }
+</script>
+
+<h2><i class="bi bi-list-stars"></i> @ViewData["Title"]</h2>
+<hr>
+
+@if (Model.Count() > 0)
+{
+    @foreach (SurveyStatistics surveyStat in Model)
+    {
+        <div class="container">
+            <h5><a class="link" asp-controller="Survey" asp-action="Status" asp-route-Id="@surveyStat.Id">@surveyStat.Name</a></h5>
+            <div class="row col-12">
+                <div class="col-3">
+                    <h6>Номер: #@surveyStat.Id <a class = "btn btn-outline-primary btn-sm" onclick = "SetClipboard(@surveyStat.Id)"><i id = "copyIcon" class="bi bi-clipboard-check"></i></a></h6>
+                </div>
+                <div class="col-3">
+                    <h6>Создано: @surveyStat.CreatedDate.ToString("dd.MM.yyyy")</h6>
+                </div>
+                <div class="col-3">
+                    <h6>Вопросов: @surveyStat.QuestionsCount</h6>
+                </div>
+                <div class="col-3">
+                    <h6>Пройдено: @surveyStat.TakenCount @WordHelp.Inflect(@surveyStat.TakenCount,"раз","раз","раза")</h6>
+                </div>
+            </div>
+            <div class="text-end">
+                <form method= "post" asp-route-Id = "@surveyStat.Id">
+                <button class = "btn btn-outline-info" type = "submit"><i class="bi bi-graph-up"></i> Результаты</button>
+                <a class="btn btn-outline-warning" asp-controller = "Survey" asp-action = "Edit" asp-route-Id = "@surveyStat.Id"><i class="bi bi-pencil"></i> Редактировать</a>
+                @if (surveyStat.IsClosed)
+                {
+                    <a class="btn btn-outline-success" asp-controller = "Survey" asp-action = "Open" asp-route-Id = "@surveyStat.Id"><i class="bi bi-door-open"></i> Открыть</a>
+                }
+                else
+                {
+                    <a class="btn btn-outline-warning" asp-controller = "Survey" asp-action = "Close" asp-route-Id = "@surveyStat.Id"><i class="bi bi-door-closed"></i> Закрыть</a>
+                }
+                <a class="btn btn-outline-danger" asp-controller = "Survey" asp-action = "Delete" asp-route-Id = "@surveyStat.Id"><i class="bi bi-trash"></i> Удалить</a>
+                </form>
+            </div>
+        </div>
+        <hr>
+    }
+}
+else
+{
+    <h5>Вы пока не создали ни одного опроса.</h5>
+}

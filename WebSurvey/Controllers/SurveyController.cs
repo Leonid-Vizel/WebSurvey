@@ -284,7 +284,6 @@ namespace WebSurvey.Controllers
         #region Close
         public IActionResult Close(int Id)
         {
-            //Только авторизованный и автор
             return View();
         }
 
@@ -340,17 +339,29 @@ namespace WebSurvey.Controllers
         }
         #endregion
 
-        #region Results
-        public IActionResult Results(int Id)
+        #region MySurveys
+
+        public IActionResult MySurveys()
         {
-            //Только авторизованный и автор
-            return View();
+            if (signInManager.IsSignedIn(User))
+            {
+                List<Survey> userSurveys = db.Surveys.Where(x => x.AuthorId.Equals(userManager.GetUserId(User))).ToList();
+                List<SurveyStatistics> userSurveysAndStats = new List<SurveyStatistics>();
+                foreach (Survey survey in userSurveys)
+                {
+                    userSurveysAndStats.Add(new SurveyStatistics(survey, db.SurveyResults.Count(x=>x.SurveyId == survey.Id), db.SurveyQuestions.Count(x=>x.SurveyId == survey.Id)));
+                }
+                return View(userSurveysAndStats);
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [ActionName("Results")]
-        public IActionResult ResultsPOST(int Id)
+        public IActionResult MySurveys(int Id)
         {
             Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
             if (foundSurvey != null)
