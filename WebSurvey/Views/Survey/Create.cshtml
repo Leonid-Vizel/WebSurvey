@@ -34,7 +34,7 @@
 </script>
 
 <script id="OptionAddBtnBlock" type="text/html">
-    <a class="btn btn-outline-info" id = "addOptionBtn-{questionNumber}" onclick = "AddOption({questionNumber})">Добавить опцию</a>
+    <a class="btn btn-outline-info" style = "margin-left:32px;" id = "addOptionBtn-{questionNumber}" onclick = "AddOption({questionNumber})"><i class="bi bi-plus-circle-dotted"></i> Добавить опцию</a>
 </script>
 
 <script src="~/js//CreateSurvey.js"></script>
@@ -154,8 +154,8 @@
         }
     }
     <hr id="addQuestionPoint">
-    <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()">Добавить вопрос</a>
-    <button type="submit" class="btn btn-outline-primary">Создать</button>
+    <a class="btn btn-outline-info" id="addQuestionBtn" onclick="AddQuestion()"><i class="bi bi-plus-circle"></i> Добавить вопрос</a>
+    <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send-fill"></i> Создать</button>
 </form>
 
 @section Scripts
