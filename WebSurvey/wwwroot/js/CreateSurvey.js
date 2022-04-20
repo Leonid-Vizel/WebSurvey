@@ -9,12 +9,15 @@
 }
 
 function OnSelectAnswer(number) {
+    console.log('sdfasfssadf');
     var AnswerSelect = document.getElementById('Questions[' + number + '].Type');
     if (AnswerSelect == null) {
         AnswerSelect = document.getElementById('Questions_' + number + '__Type');
     }
     switch (AnswerSelect.options[AnswerSelect.selectedIndex].value) {
-        case '0':  //TEXT
+        case '0':
+        case '3':
+        case '4'://TEXT
             //Remove RADIO and CHECK
             var destroyElement = document.getElementById('addOptionBtn-' + number);
             if (destroyElement != null) {
@@ -22,7 +25,7 @@ function OnSelectAnswer(number) {
             }
             var destroyOptions = document.getElementsByName('optionContainerOf' + number);
             if (destroyOptions.length > 0) {
-                if (confirm('При переключении данного вопроса на текст, все опции будут стёрты. Подтвердите действие.')) {
+                if (confirm('При переключении данного вопроса на текст или число, все опции будут стёрты. Подтвердите действие.')) {
                     while (destroyOptions.length > 0) {
                         destroyOptions[0].remove();
                     }

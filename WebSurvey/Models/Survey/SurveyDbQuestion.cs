@@ -18,6 +18,8 @@ namespace WebSurvey.Models.Survey
     {
         Text,
         Radio,
-        Check
+        Check,
+        Integer,
+        Double
     }
 }

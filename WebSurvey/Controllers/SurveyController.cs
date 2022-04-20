@@ -50,7 +50,7 @@ namespace WebSurvey.Controllers
                 int errorCount = 0;
                 for (int i = 0; i < model.Questions.Length; i++)
                 {
-                    if (model.Questions[i].Type != QuestionType.Text)
+                    if (model.Questions[i].Type == QuestionType.Radio || model.Questions[i].Type == QuestionType.Check)
                     {
                         if (model.Questions[i].Options == null || model.Questions[i].Options.Length == 0)
                         {
@@ -87,7 +87,7 @@ namespace WebSurvey.Controllers
                 {
                     if (model.Questions.Length > 0)
                     {
-                        if (model.Questions.All(x => x.Type == QuestionType.Text || (x.Options != null && x.Options.Count() > 0)))
+                        if (model.Questions.All(x => x.Type == QuestionType.Text || x.Type == QuestionType.Integer || x.Type == QuestionType.Double || (x.Options != null && x.Options.Count() > 0)))
                         {
                             model.AuthorId = userManager.GetUserId(User);
                             model.CreatedDate = DateTime.Now;
@@ -253,7 +253,7 @@ namespace WebSurvey.Controllers
                     foreach (SurveyDbQuestion question in foundQuestions)
                     {
                         IEnumerable<SurveyQuestionOption> options = db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id);
-                        if (question.Type == QuestionType.Text || options.Count() > 0)
+                        if (question.Type == QuestionType.Text || question.Type == QuestionType.Integer || question.Type == QuestionType.Double || options.Count() > 0)
                         {
                             questionList.Add(new SurveyQuestion(question, options.ToArray()));
                         }
@@ -594,13 +594,21 @@ namespace WebSurvey.Controllers
                         }
                         for (int i = 0; i < result.Results.Count; i++)
                         {
-                            if (result.Questions[i].Type == QuestionType.Check)
+                            switch(result.Questions[i].Type)
                             {
-                                worksheet.Cell(currentRow, currentCol++).Value = string.Join("; ", result.Results[i].CheckAnswers);
-                            }
-                            else
-                            {
-                                worksheet.Cell(currentRow, currentCol++).Value = result.Results[i].TextAnswer;
+                                case QuestionType.Check:
+                                    worksheet.Cell(currentRow, currentCol++).Value = string.Join("; ", result.Results[i].CheckAnswers);
+                                    break;
+                                case QuestionType.Radio:
+                                case QuestionType.Text:
+                                    worksheet.Cell(currentRow, currentCol++).Value = result.Results[i].TextAnswer;
+                                    break;
+                                case QuestionType.Integer:
+                                    worksheet.Cell(currentRow, currentCol++).Value = result.Results[i].IntAnswer;
+                                    break;
+                                case QuestionType.Double:
+                                    worksheet.Cell(currentRow, currentCol++).Value = result.Results[i].DoubleAnswer;
+                                    break;
                             }
                         }
                     }
