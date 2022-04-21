@@ -639,6 +639,89 @@ namespace WebSurvey.Controllers
         }
         #endregion
 
+        #region Edit
+        public IActionResult Edit(int Id)
+        {
+            if (signInManager.IsSignedIn(User))
+            {
+                Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == Id);
+                if (foundSurvey != null)
+                {
+                    if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                    {
+                        return View(foundSurvey);
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                }
+            }
+            else
+            {
+                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Survey editedSurvey)
+        {
+            if (ModelState.IsValid)
+            {
+                if (signInManager.IsSignedIn(User))
+                {
+                    Survey? foundSurvey = db.Surveys.FirstOrDefault(x => x.Id == editedSurvey.Id);
+                    if (foundSurvey != null)
+                    {
+                        if (foundSurvey.AuthorId.Equals(userManager.GetUserId(User)))
+                        {
+                            if (editedSurvey.IsPassworded && editedSurvey.Password == null)
+                            {
+                                ModelState.AddModelError("Password", "Укажите пароль");
+                                return View(editedSurvey);
+                            }
+                            foundSurvey.Name = editedSurvey.Name;
+                            foundSurvey.Description = editedSurvey.Description;
+                            foundSurvey.IsPassworded = editedSurvey.IsPassworded;
+                            if (!foundSurvey.IsPassworded)
+                            {
+                                foundSurvey.Password = null;
+                            }
+                            else
+                            {
+                                foundSurvey.Password = editedSurvey.Password;
+                            }
+                            db.Surveys.Update(foundSurvey);
+                            await db.SaveChangesAsync();
+                            return RedirectToAction("MySurveys");
+                        }
+                        else
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                        }
+                    }
+                    else
+                    {
+                        return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                    }
+                }
+                else
+                {
+                    return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+                }
+            }
+            else
+            {
+                return View(editedSurvey);
+            }
+        }
+        #endregion 
+
         public IActionResult List()
         {
             IEnumerable<Survey> publicSurveys = db.Surveys.Where(x => !x.IsPassworded && !x.IsClosed);
