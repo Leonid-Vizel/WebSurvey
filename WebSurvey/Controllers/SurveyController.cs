@@ -281,32 +281,39 @@ namespace WebSurvey.Controllers
         [ActionName("Take")]
         public async Task<IActionResult> TakePost(SurveyResult result)
         {
-            if (signInManager.IsSignedIn(User))
+            if (ModelState.IsValid)
             {
-                Survey? survey = db.Surveys.FirstOrDefault(x => x.Id == result.SurveyId);
-                if (survey != null)
+                if (signInManager.IsSignedIn(User))
                 {
-                    if (survey.IsOneOff && db.SurveyResults.Any(x => x.SurveyId == result.SurveyId && x.UserId.Equals(userManager.GetUserId(User))))
+                    Survey? survey = db.Surveys.FirstOrDefault(x => x.Id == result.SurveyId);
+                    if (survey != null)
                     {
-                        return RedirectToAction(controllerName: "Error", actionName: "SurveyUsed");
+                        if (survey.IsOneOff && db.SurveyResults.Any(x => x.SurveyId == result.SurveyId && x.UserId.Equals(userManager.GetUserId(User))))
+                        {
+                            return RedirectToAction(controllerName: "Error", actionName: "SurveyUsed");
+                        }
+                        if (survey.IsOneOff || !survey.IsAnonimous)
+                        {
+                            result.UserId = userManager.GetUserId(User);
+                        }
+                        result.DateTaken = DateTime.Now;
+                        await db.SurveyResults.AddAsync(result.ToDbClass());
+                        await db.SaveChangesAsync();
+                        return RedirectToAction("Index", "Home");
                     }
-                    if (survey.IsOneOff || !survey.IsAnonimous)
+                    else
                     {
-                        result.UserId = userManager.GetUserId(User);
+                        return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
                     }
-                    result.DateTaken = DateTime.Now;
-                    await db.SurveyResults.AddAsync(result.ToDbClass());
-                    await db.SaveChangesAsync();
-                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    return RedirectToAction(controllerName: "Error", actionName: "SurveyNotFound");
+                    return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
                 }
             }
             else
             {
-                return RedirectToAction(controllerName: "Error", actionName: "NeedToSignIn");
+                return View(result);
             }
         }
         #endregion
@@ -594,7 +601,7 @@ namespace WebSurvey.Controllers
                         }
                         for (int i = 0; i < result.Results.Count; i++)
                         {
-                            switch(result.Questions[i].Type)
+                            switch (result.Questions[i].Type)
                             {
                                 case QuestionType.Check:
                                     worksheet.Cell(currentRow, currentCol++).Value = string.Join("; ", result.Results[i].CheckAnswers);

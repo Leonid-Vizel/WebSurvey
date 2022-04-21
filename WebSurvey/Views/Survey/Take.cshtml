@@ -6,10 +6,10 @@
 
 <h1 class="text-center">@Model.Name</h1>
 <form method="post">
+    <div class="row container">
     @for (int i = 0; i < Model.Questions.Count(); i++)
     {
-        <b>Вопрос #@(i+1): @Model.Questions[i].Name</b>
-        <div class="row container">
+            <b>Вопрос #@(i+1): @Model.Questions[i].Name</b>
             @switch (Model.Questions[i].Type)
             {
                 case QuestionType.Text:
@@ -44,7 +44,14 @@
                     }
                     break;
             }
-        </div>
     }
-    <button type="submit" class="btn btn-outline-primary">Отправить результаты</button>
+    </div>
+    <div class = "container mt-3">
+        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-send-fill"></i> Отправить</button>
+    </div>
 </form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
