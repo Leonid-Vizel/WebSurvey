@@ -7,7 +7,7 @@ namespace WebSurvey.Models.Survey
         [Key]
         public int Id { get; set; }
         public int QuestionId { get; set; }
-        [Required(ErrorMessage = "Укажите опцию или удалите её")]
+        [Required(ErrorMessage = "Укажите название опциии или удалите её")]
         public string Text { get; set; }
     }
 }
