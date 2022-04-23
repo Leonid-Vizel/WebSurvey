@@ -4,7 +4,7 @@ namespace WebSurvey.Models.Survey
 {
     public class SurveyQuestion : SurveyDbQuestion
     {
-        public SurveyQuestion(SurveyDbQuestion input, SurveyQuestionOption[] options)
+        public SurveyQuestion(SurveyDbQuestion input, QuestionOption[] options)
         {
             Id = input.Id;
             SurveyId = input.SurveyId;
@@ -15,6 +15,6 @@ namespace WebSurvey.Models.Survey
 
         public SurveyQuestion() { }
         [ValidateNever]
-        public SurveyQuestionOption[] Options { get; set; }
+        public QuestionOption[] Options { get; set; }
     }
 }

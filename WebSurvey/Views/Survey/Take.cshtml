@@ -25,7 +25,7 @@
                     <span asp-validation-for = "Results[i].DoubleAnswer" class = "text-danger"></span>
                     break;
                 case QuestionType.Radio:
-                    foreach (SurveyQuestionOption option in Model.Questions[i].Options)
+                    foreach (QuestionOption option in Model.Questions[i].Options)
                     {
                         <div class="form-check">
                             <input asp-for="Results[i].TextAnswer" class="form-check-input" type="radio" value="@option.Text">
@@ -35,7 +35,7 @@
                     }
                     break;
                 case QuestionType.Check:
-                    foreach (SurveyQuestionOption option in Model.Questions[i].Options)
+                    foreach (QuestionOption option in Model.Questions[i].Options)
                     {
                         <div class="form-check">
                             <input name="Results[@i].CheckAnswers" class="form-check-input" type="checkbox" value="@option.Text">

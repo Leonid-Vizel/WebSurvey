@@ -16,11 +16,11 @@ namespace WebSurvey.Models.Voting
         public string Answer { get; set; }
 
         public Voting voting;
-        public List<VotingOption> options;
+        public List<QuestionOption> options;
 
         public VotingResult() { }
 
-        public VotingResult(Voting voting, List<VotingOption> options)
+        public VotingResult(Voting voting, List<QuestionOption> options)
         {
             this.voting = voting;
             this.options = options;

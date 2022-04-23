@@ -13,13 +13,4 @@ namespace WebSurvey.Models.Survey
         [Required]
         public QuestionType Type { get; set; }
     }
-
-    public enum QuestionType
-    {
-        Text,
-        Radio,
-        Check,
-        Integer,
-        Double
-    }
 }

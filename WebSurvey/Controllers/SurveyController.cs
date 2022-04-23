@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebSurvey.Data;
+using WebSurvey.Models;
 using WebSurvey.Models.Survey;
 
 namespace WebSurvey.Controllers
@@ -104,11 +105,11 @@ namespace WebSurvey.Controllers
                             {
                                 if (question.Options != null)
                                 {
-                                    foreach (SurveyQuestionOption option in question.Options)
+                                    foreach (QuestionOption option in question.Options)
                                     {
-                                        option.QuestionId = question.Id;
+                                        option.ParentId = question.Id;
                                     }
-                                    await db.SurveyQuestionOptions.AddRangeAsync(question.Options);
+                                    await db.Options.AddRangeAsync(question.Options);
                                 }
                             }
                             await db.SaveChangesAsync();
@@ -191,7 +192,7 @@ namespace WebSurvey.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Select(SurveySearchModel model)
+        public IActionResult Select(SearchModel model)
         {
             if (ModelState.IsValid)
             {
@@ -252,7 +253,7 @@ namespace WebSurvey.Controllers
                     List<SurveyQuestion> questionList = new List<SurveyQuestion>(foundQuestions.Count());
                     foreach (SurveyDbQuestion question in foundQuestions)
                     {
-                        IEnumerable<SurveyQuestionOption> options = db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id);
+                        IEnumerable<QuestionOption> options = db.Options.Where(x => x.ParentId == question.Id);
                         if (question.Type == QuestionType.Text || question.Type == QuestionType.Integer || question.Type == QuestionType.Double || options.Count() > 0)
                         {
                             questionList.Add(new SurveyQuestion(question, options.ToArray()));
@@ -512,7 +513,7 @@ namespace WebSurvey.Controllers
                     {
                         foreach (SurveyDbQuestion question in db.SurveyQuestions.Where(x => x.SurveyId == Id).ToArray())
                         {
-                            db.SurveyQuestionOptions.RemoveRange(db.SurveyQuestionOptions.Where(x => x.QuestionId == question.Id));
+                            db.Options.RemoveRange(db.Options.Where(x => x.ParentId == question.Id));
                             db.SurveyQuestions.Remove(question);
                         }
 

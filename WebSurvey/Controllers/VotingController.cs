@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using WebSurvey.Data;
 using WebSurvey.Models.Voting;
 using ClosedXML.Excel;
+using Microsoft.CodeAnalysis.Options;
+using WebSurvey.Models;
 
 namespace WebSurvey.Controllers
 {
@@ -54,10 +56,10 @@ namespace WebSurvey.Controllers
                     model.AuthorId = userManager.GetUserId(User);
                     await db.Votings.AddAsync(model);
                     await db.SaveChangesAsync();
-                    foreach (VotingOption option in model.Options)
+                    foreach (QuestionOption option in model.Options)
                     {
-                        option.VotingId = model.Id;
-                        await db.VotingOptions.AddAsync(option);
+                        option.ParentId = model.Id;
+                        await db.Options.AddAsync(option);
                     }
                     await db.SaveChangesAsync();
                     return RedirectToAction("Status", new { Id = model.Id });
@@ -85,7 +87,7 @@ namespace WebSurvey.Controllers
                 {
                     if (!foundVoting.IsClosed)
                     {
-                        if (db.VotingOptions.Count(x => x.VotingId == foundVoting.Id) > 1)
+                        if (db.Options.Count(x => x.ParentId == foundVoting.Id) > 1)
                         {
                             return View(new VotingStatistics(foundVoting, db.VotingResults.Count(x => x.VotingId == foundVoting.Id)));
                         }
@@ -164,7 +166,7 @@ namespace WebSurvey.Controllers
                         {
                             if (!foundVoting.IsPassworded || foundVoting.Password.Equals(Password))
                             {
-                                IEnumerable<VotingOption> foundOptions = db.VotingOptions.Where(x => x.VotingId == foundVoting.Id);
+                                IEnumerable<QuestionOption> foundOptions = db.Options.Where(x => x.ParentId == foundVoting.Id);
                                 if (foundOptions.Count() > 1)
                                 {
                                     return View(new VotingResult(foundVoting, foundOptions.ToList()));
@@ -234,7 +236,7 @@ namespace WebSurvey.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Select(VotingSearchModel model)
+        public IActionResult Select(SearchModel model)
         {
             if (ModelState.IsValid)
             {
@@ -447,7 +449,7 @@ namespace WebSurvey.Controllers
                 {
                     if (foundVoting.AuthorId.Equals(userManager.GetUserId(User)))
                     {
-                        db.VotingOptions.RemoveRange(db.VotingOptions.Where(x => x.VotingId == Id));
+                        db.Options.RemoveRange(db.Options.Where(x => x.ParentId == Id));
                         db.VotingResults.RemoveRange(db.VotingResults.Where(x => x.VotingId == Id));
                         db.Votings.Remove(foundVoting);
                         await db.SaveChangesAsync();
@@ -565,7 +567,7 @@ namespace WebSurvey.Controllers
                         VotingStatistics votingStats = new VotingStatistics(
                             foundVoting,
                             db.VotingResults.Where(x => x.VotingId == foundVoting.Id).ToArray(),
-                            db.VotingOptions.Where(x => x.VotingId == foundVoting.Id));
+                            db.Options.Where(x => x.ParentId == foundVoting.Id));
                         return View(votingStats);
                     }
                     else
@@ -651,7 +653,7 @@ namespace WebSurvey.Controllers
                 List<VotingStatistics> userVoteAndStats = new List<VotingStatistics>();
                 foreach (Voting voting in userVotings)
                 {
-                    userVoteAndStats.Add(new VotingStatistics(voting, db.VotingResults.Count(x => x.VotingId == voting.Id), db.VotingOptions.Count(x => x.VotingId == voting.Id)));
+                    userVoteAndStats.Add(new VotingStatistics(voting, db.VotingResults.Count(x => x.VotingId == voting.Id), db.Options.Count(x => x.ParentId == voting.Id)));
                 }
                 return View(userVoteAndStats);
             }

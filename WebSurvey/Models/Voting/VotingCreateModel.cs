@@ -6,6 +6,6 @@ namespace WebSurvey.Models.Voting
     {
         [Required(ErrorMessage = "У голосования должены быть как минимум 2 опции")]
         [MinLength(2,ErrorMessage = "У голосования должены быть как минимум 2 опции")]
-        public List<VotingOption> Options { get; set; }
+        public List<QuestionOption> Options { get; set; }
     }
 }

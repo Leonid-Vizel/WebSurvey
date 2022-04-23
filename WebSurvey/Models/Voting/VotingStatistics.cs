@@ -69,7 +69,7 @@
             OptionCount = optionCount;
         }
 
-        public VotingStatistics(Voting info, IEnumerable<VotingResult> results, IEnumerable<VotingOption> options)
+        public VotingStatistics(Voting info, IEnumerable<VotingResult> results, IEnumerable<QuestionOption> options)
         {
             Id = info.Id;
             Name = info.Name;
@@ -83,7 +83,7 @@
             ResultCounts = new Dictionary<string, int>();
             if (results.Count() > 0)
             {
-                foreach (VotingOption option in options)
+                foreach (QuestionOption option in options)
                 {
                     ResultPercents.Add(option.Text, (double)results.Count(x => x.Answer.Equals(option.Text)) / results.Count() * 100);
                     ResultCounts.Add(option.Text, results.Count(x => x.Answer.Equals(option.Text)));
@@ -91,7 +91,7 @@
             }
             else
             {
-                foreach (VotingOption option in options)
+                foreach (QuestionOption option in options)
                 {
                     ResultPercents.Add(option.Text, 0);
                     ResultCounts.Add(option.Text, 0);
