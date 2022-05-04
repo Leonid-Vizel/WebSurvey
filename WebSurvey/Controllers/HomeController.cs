@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Diagnostics;
 using WebSurvey.Data;
 using WebSurvey.Models;
@@ -23,21 +24,40 @@ namespace WebSurvey.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Index(SearchModel model)
         {
-            if (ModelState.IsValid)
+            switch (model.Type)
             {
-                if (db.Surveys.Any(x=>x.Id == model.Search))
-                {
-                    return RedirectToAction(controllerName: "Survey", actionName: "Status", routeValues: new { Id = model.Search } );
-                }
-                else
-                {
-                    ModelState.AddModelError("Search","Опрос не найден");
+                case EntityType.Survey:
+                    if (!ModelState.IsValid && ModelState["SearchSurvey"].ValidationState != ModelValidationState.Valid)
+                    {
+                        return View(model);
+                    }
+                    if (db.Surveys.Any(x => x.Id == model.SearchSurvey))
+                    {
+                        return RedirectToAction(controllerName: "Survey", actionName: "Status", routeValues: new { Id = model.SearchSurvey });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("SearchSurvey", "Опрос не найден");
+                        return View(model);
+                    }
+                case EntityType.Voting:
+                    if (!ModelState.IsValid && ModelState["SearchVoting"].ValidationState != ModelValidationState.Valid)
+                    {
+                        return View(model);
+                    }
+                    if (db.Votings.Any(x => x.Id == model.SearchVoting))
+                    {
+                        return RedirectToAction(controllerName: "Voting", actionName: "Status", routeValues: new { Id = model.SearchVoting });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("SearchVoting", "Голосование не найдено");
+                        return View(model);
+                    }
+                default:
+                    ModelState.AddModelError("SearchVoting", "Элемент не найден");
+                    ModelState.AddModelError("SearchSurvey", "Элемент не найден");
                     return View(model);
-                }
-            }
-            else
-            {
-                return View();
             }
         }
 

@@ -1,31 +1,36 @@
-﻿@model SearchModel
+﻿@using WebSurvey.Models;
+@model SearchModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Добро пожаловать!</h1>
-    <p>Здесь Вы сможете создавать и проходить опросы!</p>
+    <h1 class="display-4">Добро пожаловать на VZSurvey!</h1>
+    <p>Здесь Вы можете создавать свои опросы и голосования!</p>
 </div>
 
 <div class="container row justify-content-center">
     <div class="card" style="width: 18rem;">
-        <img class="card-img-top" src="/img/PlusImage.png" alt="Card image cap">
+        <img class="card-img-top" src="/img/SurveyImage.png" alt="Опрос">
         <div class="card-body">
-            <h5 class="card-title">Создать опрос</h5>
-            <p class="card-text">Создавайте свои собственные опросы с мопощью генератора опросов. Для использования зарегистрируйтсь.</p>
-            <a asp-controller="Survey" asp-action="Create" class="btn btn-outline-primary" style="width: 100%">Создать</a>
+            <h5 class="card-title">Пройти опрос</h5>
+            <form method="post" asp-route-type = "@EntityType.Survey">
+                <label class = "card-text">Введите ID опроса:</label>
+                <input asp-for="SearchSurvey" class="form-control mb-1" placeholder = "0" aria-required = "true">
+                <span asp-validation-for = "SearchSurvey" class = "text-danger"></span>
+                <button type = "submit" class = "btn btn-outline-primary" style="width: 100%">Пройти</button>
+            </form>
         </div>
     </div>
     <div class="card" style="width: 18rem;">
-        <img class="card-img-top" src="/img/VoteImage.png" alt="Card image cap">
+        <img class="card-img-top" src="/img/VoteImage.png" alt="Голосование">
         <div class="card-body">
-            <h5 class="card-title">Пройти опрос</h5>
-            <form method="post">
-                <label class = "card-text">Введите номер опроса:</label>
-                <input asp-for="Search" class="form-control mb-1" placeholder = "0" aria-required = "true">
-                <span asp-validation-for="Search" class="text-danger"></span>
-                <button type = "submit" class = "btn btn-outline-primary" style="width: 100%">Пройти</button>
+            <h5 class="card-title">Голосовать</h5>
+            <form method="post" asp-route-type = "@EntityType.Voting">
+                <label class = "card-text">Введите ID голосования:</label>
+                <input asp-for="SearchVoting" class="form-control mb-1" placeholder = "0" aria-required = "true">
+                <span asp-validation-for="SearchVoting" class="text-danger"></span>
+                <button type = "submit" class = "btn btn-outline-primary" style="width: 100%">Голосовать</button>
             </form>
         </div>
     </div>
