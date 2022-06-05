@@ -8,6 +8,7 @@
             Name = input.Name;
             Description = input.Description;
             IsAnonimous = input.IsAnonimous;
+            CreatedDate = input.CreatedDate;
             IsOneOff = input.IsOneOff;
             IsPassworded = input.IsPassworded;
             IsClosed = input.IsClosed;

@@ -566,7 +566,7 @@ namespace WebSurvey.Controllers
                     {
                         VotingStatistics votingStats = new VotingStatistics(
                             foundVoting,
-                            db.VotingResults.Where(x => x.VotingId == foundVoting.Id).ToArray(),
+                            db.VotingResults.Where(x => x.VotingId == foundVoting.Id),
                             db.Options.Where(x => x.ParentId == foundVoting.Id));
                         return View(votingStats);
                     }
