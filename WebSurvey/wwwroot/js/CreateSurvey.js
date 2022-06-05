@@ -9,7 +9,6 @@
 }
 
 function OnSelectAnswer(number) {
-    console.log('sdfasfssadf');
     var AnswerSelect = document.getElementById('Questions[' + number + '].Type');
     if (AnswerSelect == null) {
         AnswerSelect = document.getElementById('Questions_' + number + '__Type');
@@ -19,9 +18,13 @@ function OnSelectAnswer(number) {
         case '3':
         case '4'://TEXT
             //Remove RADIO and CHECK
-            var destroyElement = document.getElementById('addOptionBtn-' + number);
-            if (destroyElement != null) {
-                destroyElement.remove();
+            var destroyButton = document.getElementById('addOptionBtn-' + number);
+            var destroyDiv = document.getElementById('addOptionBlock-' + number);
+            if (destroyButton != null) {
+                destroyButton.remove();
+            }
+            if (destroyDiv != null) {
+                destroyDiv.remove();
             }
             var destroyOptions = document.getElementsByName('optionContainerOf' + number);
             if (destroyOptions.length > 0) {
@@ -35,8 +38,9 @@ function OnSelectAnswer(number) {
         case '1':
         case '2':
             if (document.getElementById('addOptionBtn-' + number) == null) {
-                var div = document.createElement('div');
+                var div = document.createElement('div',);
                 div.innerHTML = document.getElementById('OptionAddBtnBlock').innerHTML.replace(/{questionNumber}/g, number);
+                div.id = 'addOptionBlock-' + number;
                 var insertAfter = document.getElementById(number);
                 insertAfter.insertAdjacentElement('afterend', div);
             }
@@ -85,10 +89,14 @@ function RenameAllQuestions(element, id) {
         element.setAttribute('data-valmsg-for', 'Questions[' + id + '].Text');
     }
     //'Add Option' button
-    element = document.getElementById('addOptionBtn-' + identificator);
+    var element = document.getElementById('addOptionBtn-' + identificator);
     if (element != null) {
         element.setAttribute('id', 'addOptionBtn-' + id);
         element.setAttribute('onclick', 'AddOption(' + id + ')');
+    }
+    var element = document.getElementById('addOptionBlock-' + identificator);
+    if (element != null) {
+        element.setAttribute('id', 'addOptionBlock-' + id);
     }
     //Options
     containers = document.getElementsByName('optionContainerOf' + identificator);
@@ -143,9 +151,13 @@ function DeleteAndCheckQuestion(questionNumber) {
         count = count + 1;
         destroyOptions[0].remove();
     }
-    var destroyElement = document.getElementById('addOptionBtn-' + questionNumber);
-    if (destroyElement != null) {
-        destroyElement.remove();
+    var destroyButton = document.getElementById('addOptionBtn-' + questionNumber);
+    var destroyDiv = document.getElementById('addOptionBlock-' + questionNumber);
+    if (destroyButton != null) {
+        destroyButton.remove();
+    }
+    if (destroyDiv != null) {
+        destroyDiv.remove();
     }
     $("input[id='Questions[" + questionNumber + "].Name']").rules('remove', 'required');
     $('#' + questionNumber).remove();
